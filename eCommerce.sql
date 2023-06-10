@@ -472,7 +472,7 @@ VALUES (uuid_short(),
  
 --  Dummy 2
 INSERT INTO `shop`.`pesanan` (`id`, `idPengguna`, `idPelapak`, `idPromo`, `idDompet`, `tanggal`, `catatan`, `status`)
-VALUES (uuid_short(), 
+VALUES (uuid_short(),
 (SELECT `id` FROM `shop`.`pengguna`  WHERE namaLengkap = "Cita"), 
 (SELECT `id` FROM `shop`.`pelapak` WHERE nama = "Zara"), 
 (SELECT `id` FROM `shop`.`promo` WHERE nama = "Promo 6.6"),
@@ -482,7 +482,6 @@ VALUES (uuid_short(),
  end <>
  delimiter ;
 
-
 INSERT INTO `shop`.`pengguna` (`id`, `namaLengkap`, `noTelp`, `email`, `password`, `otp`, `pin`, `status`) VALUES 
 (UUID(), 'Ilham', '08129022310', 'ilham@gmail.com', password('ilham7580'),'0012', '7580', 'aktif'),
 (UUID(), 'Cita', '087638172311', 'cita12@gmail.com', password('cita123'),'0012', '1234', 'aktif'),
@@ -490,6 +489,53 @@ INSERT INTO `shop`.`pengguna` (`id`, `namaLengkap`, `noTelp`, `email`, `password
 (UUID(), 'Windah', '085378908716', 'Windahgeming@gmail.com', password('windah4444'),'0012', '4444', 'aktif'),
 (UUID(), 'Basudara', '085379809112', 'basudarageming@gmail.com', password('basudara8989'),'0012', '8989', 'aktif');
 
+delimiter <>
+create or replace procedure validasiLoginViaNoTelp(varNoTelp varchar(255),varPassword varchar(255))
+begin
+declare cekNoTelp int;
+declare cekPassword int;
+set cekNoTelp=(select noTelp from pengguna where noTelp=varNoTelp);
+set cekPassword=(select password from pengguna where noTelp=varNoTelp and password=password(varPassword));
+if(cekNoTelp is null) then
+	signal sqlstate '44444'
+	set message_text = 'Nomor telepon yang diinput belum terdaftar';-- lewat dari if ini berarti no telp pasti terdaftar
+else 
+	if(cekPassword is null) then
+		signal sqlstate '44444'
+		set message_text = 'Password yang diinput salah';
+	else
+		select 'Login Berhasil' as Notifikasi;
+	end if;
+end if;
+end <>
+delimiter ;
+call validasiLoginViaEmail('hhhhh@gmail.com','ilham7580');
+call validasiLoginViaEmail('ilham@gmail.com','hhhhhhhhh');
+call validasiLoginViaEmail('ilham@gmail.com','ilham7580');
+
+delimiter <>
+create or replace procedure validasiLoginViaEmail(varEmail varchar(255),varPassword varchar(255))
+begin
+declare cekEmail int;
+declare cekPassword int;
+set cekEmail=(select email from pengguna where email=varEmail);
+set cekPassword=(select password from pengguna where email=varEmail and password=password(varPassword));
+if(cekEmail is null) then
+	signal sqlstate '44444'
+	set message_text = 'Email yang diinput belum terdaftar';-- lewat dari if ini berarti email pasti terdaftar
+else 
+	if(cekPassword is null) then
+		signal sqlstate '44444'
+		set message_text = 'Password yang diinput salah';
+	else
+		select 'Login Berhasil' as Notifikasi;
+	end if;
+end if;
+end <>
+delimiter ;
+call validasiLoginViaNoTelp('99999999999','ilham7580');
+call validasiLoginViaNoTelp('08129022310','hhhhhhhhh');
+call validasiLoginViaNoTelp('08129022310','ilham7580');
 
 select *from pengguna;
 select *from dompetdigital;
