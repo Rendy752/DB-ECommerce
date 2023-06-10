@@ -23,11 +23,10 @@ drop table if exists dompetdigital;
 CREATE TABLE IF NOT EXISTS `shop`.`pengguna` (
   `id` CHAR(36) NOT NULL,
   `namaLengkap` VARCHAR(255) NOT NULL,
-  `noTelp` VARCHAR(20) NOT NULL,
-  `email` VARCHAR(255) NOT NULL,
+  `noTelp` VARCHAR(20),
+  `email` VARCHAR(255),
   `password` VARCHAR(255) NOT NULL,
-  `otp` CHAR(36),
-  `pin` CHAR(36),
+  `pin` CHAR(4),
   `status` VARCHAR(255) NOT NULL,
   `createdAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updatedAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -50,9 +49,7 @@ CREATE TABLE IF NOT EXISTS `shop`.`promo` (
   `id` CHAR(36) NOT NULL,
   `nama` VARCHAR(255) NOT NULL,
   `deskripsi` VARCHAR(255) NOT NULL,
-  `jenis` VARCHAR(255) NOT NULL,
   `minTransaksi` DECIMAL(10,2) NOT NULL,
-  `status` VARCHAR(255) NOT NULL,
   `statusPengguna` VARCHAR(255) NOT NULL,
   `createdAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updatedAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -241,61 +238,8 @@ CREATE TABLE IF NOT EXISTS `shop`.`detailPesanan` (
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
 
-
--- Table pengguna
-INSERT INTO `shop`.`pengguna` (`id`, `namaLengkap`, `noTelp`, `email`, `password`, `otp`, `pin`, `status`) 
--- Dummy 1
-VALUES (UUID(), 'Ilham', '08129022310', 'ilham@gmail.com', password('ilham7580'),'0012', '7580', 'aktif'),
--- Dummy 2
-(UUID(), 'Cita', '087638172311', 'cita12@gmail.com', password('cita123'),'0012', '1234', 'aktif'),
--- Dummy 3
-(UUID(), 'Laura', '085367818912', 'Laura22@gmail.com', password('laura2233'),'0012', '2233', 'tidak aktif'),
--- Dummy 4
-(UUID(), 'Windah', '085378908716', 'Windahgeming@gmail.com', password('windah4444'),'0012', '4444', 'aktif'),
--- Dummy 5
-(UUID(), 'Basudara', '085379809112', 'basudarageming@gmail.com', password('basudara8989'),'0012', '8989', 'aktif');
-
-
--- Table kategori
-INSERT INTO `shop`.`kategori` (`id`, `nama`)
--- Dummy 1
-VALUES (UUID(), 'Elektronik'),
--- Dummy 2
-(UUID(), 'Fashion'),
--- Dummy 3
-(UUID(), 'Perfume'),
--- Dummy 4
-(UUID(), 'Accesories'),
--- Dummy 5
-(UUID(), 'Alat Dapur');
-
-
--- Table promo
-INSERT INTO `shop`.`promo` (`id`, `nama`, `deskripsi`, `jenis`, `minTransaksi`, `status`, `statusPengguna`)
--- Dummy 1
-VALUES (UUID(), 'Promo Lebaran', 'Diskon 20% untuk semua produk', 'diskon', 100000, 'aktif', 'semua'),
--- Dummy 2
-(UUID(), 'Promo Natal', 'Diskon 10% untuk semua produk', 'diskon', 200000, 'aktif', 'semua'),
--- Dummy 3
-(UUID(), 'Promo 6.6', 'Diskon 20% untuk semua produk', 'diskon', 400000, 'aktif', 'semua'),
--- Dummy 4
-(UUID(), 'Promo Potongan', 'Diskon 10% Potongan Untuk Produk Yang Dpilih', 'diskon', 0, 'aktif', 'semua'),
--- Dummy 5
-(UUID(), 'Promo Tahun Baru', 'Diskon 40% untuk semua produk', 'diskon', 200000, 'Tidak Aktif', 'semua');
-
-
--- Table dompetDigital
-INSERT INTO `shop`.`dompetDigital` (`id`, `nama`)
--- Dummy 1
-VALUES (UUID(), 'OVO'),
--- Dummy 2
-(UUID(), 'BCA'),
--- Dummy 3
-(UUID(), 'GoPay'),
--- Dummy 4
-(UUID(), 'ShopeePay'),
--- Dummy 5
-(UUID(), 'DANA');
+end <>
+delimiter ;
 
 
 -- Table alamat
@@ -506,16 +450,53 @@ INSERT INTO `shop`.`detailpesanan` (`idPesanan`, `idProduk`) values
 ((SELECT `id` FROM `shop`.`pesanan`  WHERE idpengguna = (SELECT `id` FROM `shop`.`pengguna`  WHERE namaLengkap = "Ilham")),
 (SELECT `id` FROM `shop`.`produk`  WHERE nama = "Kemeja Denim"));
 
+
+delimiter <>
+create or replace trigger register 
+before insert on pengguna for each row
+begin
+declare cekNoTelp int;
+declare cekEmail int;
+set cekNoTelp=(select noTelp from pengguna where noTelp= new.noTelp);
+set cekEmail=(select email from pengguna where email=new.Email);
+if (cekNoTelp is null and new.noTelp is not null) then
+	if(char_length(new.password)<8) then
+		signal sqlstate '44444'
+		set message_text = 'Password minimal 8 digit!!';
+	else
+		set new.id = uuid();
+		set new.password=password(new.password);
+        set new.status="baru";
+	end if;
+elseif(cekEmail is null and new.email is not null) then
+	if(char_length(new.password)<8) then
+		signal sqlstate '44444'
+		set message_text = 'Password minimal 8 digit!!';
+	else
+		set new.id = uuid();
+		set new.password=password(new.password);
+        set new.status="bronze";
+	end if;
+else
+	signal sqlstate '44444'
+	set message_text = 'Nomor telepon atau email sudah terdaftar';
+end if;
 end <>
 delimiter ;
 
-INSERT INTO `shop`.`pengguna` (`id`, `namaLengkap`, `noTelp`, `email`, `password`, `otp`, `pin`, `status`) VALUES 
-(UUID(), 'Ilham', '08129022310', 'ilham@gmail.com', password('ilham7580'),'0012', '7580', 'aktif'),
-(UUID(), 'Cita', '087638172311', 'cita12@gmail.com', password('cita123'),'0012', '1234', 'aktif'),
-(UUID(), 'Laura', '085367818912', 'Laura22@gmail.com', password('laura2233'),'0012', '2233', 'tidak aktif'),
-(UUID(), 'Windah', '085378908716', 'Windahgeming@gmail.com', password('windah4444'),'0012', '4444', 'aktif'),
-(UUID(), 'Basudara', '085379809112', 'basudarageming@gmail.com', password('basudara8989'),'0012', '8989', 'aktif');
+INSERT INTO `shop`.`pengguna` (`namaLengkap`, `noTelp`, `email`, `password`, `pin`) VALUES 
+('Ilham', '08129022310', 'ilham@gmail.com', 'ilham7580', '7580');
+INSERT INTO `shop`.`pengguna` (`namaLengkap`, `email`, `password`) VALUES 
+('Ilham', 'ilham@gmail.com', 'ilham7580');-- email sama
+INSERT INTO `shop`.`pengguna` (`namaLengkap`, `noTelp`, `password`) VALUES 
+('Ilham', '08129022310', 'ilham7580');-- no telepon sama
+INSERT INTO `shop`.`pengguna` (`namaLengkap`, `noTelp`, `password`) VALUES 
+('Laura', '085367818912', 'laura12');-- password <8 digit
+INSERT INTO `shop`.`pengguna` (`namaLengkap`, `noTelp`,`email`, `password`) VALUES 
+('Laura', '085367818912', 'Laura22@gmail.com','laura123');
 
+select*from pengguna;
+call reset();
 delimiter <>
 create or replace procedure validasiLoginViaNoTelp(varNoTelp varchar(255),varPassword varchar(255))
 begin
@@ -523,7 +504,6 @@ declare cekNoTelp int;
 declare cekPassword int;
 set cekNoTelp=(select noTelp from pengguna where noTelp= varNoTelp);
 set cekPassword=(select password from pengguna where noTelp=varNoTelp and password=password(varPassword));
-
 if(cekNoTelp is null) then
 	signal sqlstate '44444'
 	set message_text = 'Nomor telepon yang diinput belum terdaftar';-- lewat dari if ini berarti no telp pasti terdaftar
@@ -538,11 +518,9 @@ end if;
 end <>
 delimiter ;
 
-
-
-call validasiLoginViaEmail('hhhhh@gmail.com','ilham7580');
-call validasiLoginViaEmail('ilham@gmail.com','hhhhhhhhh');
-call validasiLoginViaEmail('ilham@gmail.com','ilham7580');
+call validasiLoginViaNoTelp('99999999999','ilham7580');
+call validasiLoginViaNoTelp('08129022310','hhhhhhhhh');
+call validasiLoginViaNoTelp('08129022310','ilham7580');
 
 delimiter <>
 create or replace procedure validasiLoginViaEmail(varEmail varchar(255),varPassword varchar(255))
@@ -559,14 +537,124 @@ else
 		signal sqlstate '44444'
 		set message_text = 'Password yang diinput salah';
 	else
-		select 'Login Berhasil' as Notifikasi,now() as Waktu, ;
+		select 'Login Berhasil' as Notifikasi,now() as Waktu;
 	end if;
 end if;
 end <>
 delimiter ;
-call validasiLoginViaNoTelp('99999999999','ilham7580');
-call validasiLoginViaNoTelp('08129022310','hhhhhhhhh');
-call validasiLoginViaNoTelp('08129022310','ilham7580');
+
+call validasiLoginViaEmail('hhhhh@gmail.com','ilham7580');
+call validasiLoginViaEmail('ilham@gmail.com','hhhhhhhhh');
+call validasiLoginViaEmail('ilham@gmail.com','ilham7580');
+
+delimiter <>
+create trigger addKategori
+before insert on kategori for each row
+begin
+declare cekKategori int;
+set cekKategori=(select nama from kategori where nama=new.nama);
+if(cekKategori is not null) then
+	signal sqlstate '44444'
+	set message_text = 'Kategori sudah ada!!';
+end if;
+set new.id = uuid();
+end <>
+delimiter ;
+
+INSERT INTO `shop`.`kategori` (`nama`) VALUES ('Elektronik');
+INSERT INTO `shop`.`kategori` (`nama`) VALUES ('Fashion');
+INSERT INTO `shop`.`kategori` (`nama`) VALUES ('Elektronik');
+INSERT INTO `shop`.`kategori` (`nama`) VALUES ('Perfume');
+INSERT INTO `shop`.`kategori` (`nama`) VALUES ('Accesories');
+INSERT INTO `shop`.`kategori` (`nama`) VALUES ('fashion');
+INSERT INTO `shop`.`kategori` (`nama`) VALUES ('Alat Dapur');
+select*from kategori;
+
+delimiter <>
+create or replace trigger addPelapak
+before insert on pelapak for each row
+begin
+declare cekPelapak int;
+declare cekLokasi int;
+set cekPelapak=(select nama from pelapak where nama=new.nama);
+set cekLokasi=(select lokasi from pelapak where nama=new.nama and lokasi=new.lokasi);
+if(cekPelapak is not null and cekLokasi is not null) then
+	signal sqlstate '44444'
+	set message_text = 'Pelapak sudah ada, tidak bisa menambah data';
+end if;
+set new.id = uuid();
+end <>
+delimiter ;
+select*from pelapak;
+INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`, `feedbackPositif`, `waktuProsesTercepat`, `waktuProsesTerlama`) VALUES 
+('Asus Official', 'Jakarta', 'positif', 2, 5);
+INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`, `feedbackPositif`, `waktuProsesTercepat`, `waktuProsesTerlama`) VALUES 
+('Zara', 'Bandung', 'positif', 1, 3);
+INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`, `feedbackPositif`, `waktuProsesTercepat`, `waktuProsesTerlama`) VALUES 
+('Asus Official', 'Jakarta', 'positif', 4, 6);
+INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`, `feedbackPositif`, `waktuProsesTercepat`, `waktuProsesTerlama`) VALUES 
+('Indonesia Merk', 'Jakarta', 'positif', 3, 5);
+INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`, `feedbackPositif`, `waktuProsesTercepat`, `waktuProsesTerlama`) VALUES 
+('Xyz Shop', 'Bandung', 'positif', 20, 24);
+INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`, `feedbackPositif`, `waktuProsesTercepat`, `waktuProsesTerlama`) VALUES 
+('H&M', 'Jakarta', 'positif', 1, 2);
+INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`, `feedbackPositif`, `waktuProsesTercepat`, `waktuProsesTerlama`) VALUES 
+('Gucci', 'Kalimantan', 'positif', 1, 3);
+INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`, `feedbackPositif`, `waktuProsesTercepat`, `waktuProsesTerlama`) VALUES 
+('Sonny Official', 'Jakarta', 'positif', 2, 4);
+INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`, `feedbackPositif`, `waktuProsesTercepat`, `waktuProsesTerlama`) VALUES 
+('Samsung Official', 'Jakarta', 'negatif', 1, 3);
+INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`, `feedbackPositif`, `waktuProsesTercepat`, `waktuProsesTerlama`) VALUES 
+('Samsung Official', 'Jakarta', 'negatif', 1, 6);
+select*from pelapak;
+
+delimiter <>
+create trigger addDompetDigital
+before insert on dompetdigital for each row
+begin
+declare cekDompetDigital int;
+set cekDompetDigital=(select nama from dompetdigital where nama=new.nama);
+if(cekDompetDigital is not null) then
+	signal sqlstate '44444'
+	set message_text = 'Dompet digital sudah ada, tidak dapat menambah data';
+end if;
+set new.id = uuid();
+end <>
+delimiter ;
+
+INSERT INTO `shop`.`dompetDigital` (`nama`) VALUES ('OVO');
+INSERT INTO `shop`.`dompetDigital` (`nama`) VALUES ('OVO');
+INSERT INTO `shop`.`dompetDigital` (`nama`) VALUES ('BCA');
+INSERT INTO `shop`.`dompetDigital` (`nama`) VALUES ('GoPay');
+INSERT INTO `shop`.`dompetDigital` (`nama`) VALUES ('ShopeePay');
+INSERT INTO `shop`.`dompetDigital` (`nama`) VALUES ('DANA');
+select*from dompetdigital;
+
+delimiter <>
+create trigger addPromo
+before insert on promo for each row
+begin
+declare cekPromo int;
+set cekPromo=(select nama from dompetdigital where nama=new.nama);
+if(cekPromo is not null) then
+	signal sqlstate '44444'
+	set message_text = 'Promo sudah ada, tidak dapat menambah data';
+end if;
+set new.id = uuid();
+end <>
+delimiter ;
+
+INSERT INTO `shop`.`promo` (`nama`, `deskripsi`, `minTransaksi`, `statusPengguna`) VALUES 
+('Promo Lebaran', 'Diskon 20% untuk semua produk', 100000, 'bronze');
+-- Dummy 2
+(UUID(), 'Promo Natal', 'Diskon 10% untuk semua produk', 200000, 'silver'),
+-- Dummy 3
+(UUID(), 'Promo 6.6', 'Diskon 20% untuk semua produk', 400000, 'gold'),
+-- Dummy 4
+(UUID(), 'Promo Potongan', 'Diskon 10% Potongan Untuk Produk Yang Dpilih', 0, 'bronze'),
+-- Dummy 5
+(UUID(), 'Promo Tahun Baru', 'Diskon 40% untuk semua produk', 200000, 'platinum');
+
 
 select *from pengguna;
 select *from dompetdigital;
