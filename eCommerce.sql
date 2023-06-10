@@ -8,6 +8,7 @@ begin
 
 drop table if exists promoterhubung;
 drop table if exists keranjang;
+drop table if exists detailpesanan;
 drop table if exists pesanan;
 drop table if exists dompetterhubung;
 drop table if exists promo;
@@ -71,7 +72,7 @@ ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
 
 CREATE TABLE IF NOT EXISTS `shop`.`alamat` (
-	`id` CHAR(36) NOT NULL,
+  `id` CHAR(36) NOT NULL,
   `idPengguna` CHAR(36) NOT NULL,
   `alamatLengkap` VARCHAR(255) NOT NULL,
   `alamatSebagai` ENUM('rumah','apartemen','kantor','lainnya'),
@@ -85,7 +86,8 @@ CREATE TABLE IF NOT EXISTS `shop`.`alamat` (
   `updatedAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT `fk_idPengguna`
     FOREIGN KEY (`idPengguna`)
-    REFERENCES `shop`.`pengguna` (`id`)
+    REFERENCES `shop`.`pengguna` (`id`),
+    PRIMARY KEY(`id`)
 )
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
@@ -225,11 +227,13 @@ ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
 
 CREATE TABLE IF NOT EXISTS `shop`.`detailPesanan` (
-  `id_pesanan` CHAR(36) NOT NULL,
+  `idPesanan` CHAR(36) NOT NULL,
   `idProduk` CHAR(36) NOT NULL,
   `createdAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updatedAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
+  CONSTRAINT `fk_idPesananDetailPesanan`
+    FOREIGN KEY (`idPesanan`)
+    REFERENCES `shop`.`pesanan` (`id`),
   CONSTRAINT `fk_idProdukPesanan`
     FOREIGN KEY (`idProduk`)
     REFERENCES `shop`.`produk` (`id`)
@@ -295,35 +299,30 @@ VALUES (UUID(), 'OVO'),
 
 
 -- Table alamat
-INSERT INTO `shop`.`alamat` (`idPengguna`, `idDompet`, `alamatLengkap`, `alamatSebagai`, `namaPenerima`, `noTelp`, `kecamatan`, `kota`, `provinsi`, `kodePos`)
+INSERT INTO `shop`.`alamat` (`id`, `idPengguna`, `alamatLengkap`, `alamatSebagai`, `namaPenerima`, `noTelp`, `kecamatan`, `kota`, `provinsi`, `kodePos`)
 -- Dummy 1
 SELECT
-(SELECT id FROM shop.pengguna WHERE namaLengkap = 'Ilham') AS idPengguna,
-(SELECT id FROM shop.dompetDigital WHERE nama = 'OVO') AS idDompet,
+uuid(),(SELECT id FROM shop.pengguna WHERE namaLengkap = 'Ilham') AS idPengguna,
 'Jl. Rambutan No. 123', 'rumah', 'Ilham', '08129022310', 'Kec. Rambutan', 'Kota Palembang', 'Provinsi Sumatera Selatan', 32511
 UNION ALL
 -- Dummy 2
 SELECT
-(SELECT id FROM shop.pengguna WHERE namaLengkap = 'Cita') AS idPengguna,
-(SELECT id FROM shop.dompetDigital WHERE nama = 'ShopeePay') AS idDompet,
+uuid(),(SELECT id FROM shop.pengguna WHERE namaLengkap = 'Cita') AS idPengguna,
 'Jl. Mangga No. 456', 'kantor', 'Cita', '087638172311', 'Kec. Mangga', 'Kota Palembang', 'Provinsi Sumatera Selatan', 32512
 UNION ALL
 -- Dummy 3
 SELECT
-(SELECT id FROM shop.pengguna WHERE namaLengkap = 'Laura') AS idPengguna,
-(SELECT id FROM shop.dompetDigital WHERE nama = 'DANA') AS idDompet,
+uuid(),(SELECT id FROM shop.pengguna WHERE namaLengkap = 'Laura') AS idPengguna,
 'Jl. Apel No. 789', 'rumah', 'Laura', '085367818912', 'Kec. Apel', 'Kota Palembang', 'Provinsi Sumatera Selatan', 32513
 UNION ALL
 -- Dummy 4
 SELECT
-(SELECT id FROM shop.pengguna WHERE namaLengkap = 'Windah') AS idPengguna,
-(SELECT id FROM shop.dompetDigital WHERE nama = 'DANA') AS idDompet,
+uuid(),(SELECT id FROM shop.pengguna WHERE namaLengkap = 'Windah') AS idPengguna,
 'Jl. Jeruk No. 101', 'rumah', 'Windah', '085378908716', 'Kec. Jeruk', 'Kota Palembang', 'Provinsi Sumatera Selatan', 32514
 UNION ALL
 -- Dummy 5
 SELECT
-(SELECT id FROM shop.pengguna WHERE namaLengkap = 'Basudara') AS idPengguna,
-(SELECT id FROM shop.dompetDigital WHERE nama = 'OVO') AS idDompet,
+uuid(),(SELECT id FROM shop.pengguna WHERE namaLengkap = 'Basudara') AS idPengguna,
 'Jl. Manggis No. 202', 'rumah', 'Basudara', '085379809112', 'Kec. Manggis', 'Kota Palembang', 'Provinsi Sumatera Selatan', 32515;
   
 
@@ -476,25 +475,39 @@ SELECT
 
 -- Table pesanan
 --  Dummy 1
-INSERT INTO `shop`.`pesanan` (`id`, `idPengguna`, `idPelapak`, `idPromo`, `idDompet`, `tanggal`, `catatan`, `status`)
+INSERT INTO `shop`.`pesanan` (`id`, `idPengguna`, `idPelapak`, `idPromo`, `idAlamat`, `idDompet`, `tanggal`, `catatan`, `status`)
 VALUES (uuid_short(), 
 (SELECT `id` FROM `shop`.`pengguna`  WHERE namaLengkap = "Ilham"),
 (SELECT `id` FROM `shop`.`pelapak` WHERE nama = "Asus Official"), 
 (SELECT `id` FROM `shop`.`promo` WHERE nama = "Promo Lebaran"),
+(SELECT `id` FROM `shop`.`alamat` WHERE kodePos='32511'),
  (SELECT `id` FROM `shop`.`dompetDigital` WHERE nama = "OVO" ), 
  '2023-06-06', ' ', 'proses');
  
 --  Dummy 2
-INSERT INTO `shop`.`pesanan` (`id`, `idPengguna`, `idPelapak`, `idPromo`, `idDompet`, `tanggal`, `catatan`, `status`)
+INSERT INTO `shop`.`pesanan` (`id`, `idPengguna`, `idPelapak`, `idPromo`, `idAlamat`, `idDompet`, `tanggal`, `catatan`, `status`)
 VALUES (uuid_short(),
 (SELECT `id` FROM `shop`.`pengguna`  WHERE namaLengkap = "Cita"), 
 (SELECT `id` FROM `shop`.`pelapak` WHERE nama = "Zara"), 
 (SELECT `id` FROM `shop`.`promo` WHERE nama = "Promo 6.6"),
+(SELECT `id` FROM `shop`.`alamat` WHERE kodePos='32511'),
  (SELECT `id` FROM `shop`.`dompetDigital` WHERE nama = "OVO" ), 
  '2023-06-06', ' ', 'proses');
  
- end <>
- delimiter ;
+ -- Table detailpesanan
+ --  Dummy 1
+INSERT INTO `shop`.`detailpesanan` (`idPesanan`, `idProduk`) values
+((SELECT `id` FROM `shop`.`pesanan`  WHERE idpengguna = (SELECT `id` FROM `shop`.`pengguna`  WHERE namaLengkap = "Cita")),
+(SELECT `id` FROM `shop`.`produk`  WHERE nama = "Laptop Asus ZenForce"));
+
+ --  Dummy 1
+
+INSERT INTO `shop`.`detailpesanan` (`idPesanan`, `idProduk`) values
+((SELECT `id` FROM `shop`.`pesanan`  WHERE idpengguna = (SELECT `id` FROM `shop`.`pengguna`  WHERE namaLengkap = "Ilham")),
+(SELECT `id` FROM `shop`.`produk`  WHERE nama = "Kemeja Denim"));
+
+end <>
+delimiter ;
 
 INSERT INTO `shop`.`pengguna` (`id`, `namaLengkap`, `noTelp`, `email`, `password`, `otp`, `pin`, `status`) VALUES 
 (UUID(), 'Ilham', '08129022310', 'ilham@gmail.com', password('ilham7580'),'0012', '7580', 'aktif'),
