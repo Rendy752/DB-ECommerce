@@ -71,8 +71,8 @@ ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
 
 CREATE TABLE IF NOT EXISTS `shop`.`alamat` (
+	`id` CHAR(36) NOT NULL,
   `idPengguna` CHAR(36) NOT NULL,
-  `idDompet` CHAR(36) NOT NULL,
   `alamatLengkap` VARCHAR(255) NOT NULL,
   `alamatSebagai` ENUM('rumah','apartemen','kantor','lainnya'),
   `namaPenerima` VARCHAR(255) NOT NULL,
@@ -85,10 +85,7 @@ CREATE TABLE IF NOT EXISTS `shop`.`alamat` (
   `updatedAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT `fk_idPengguna`
     FOREIGN KEY (`idPengguna`)
-    REFERENCES `shop`.`pengguna` (`id`),
-  CONSTRAINT `fk_idDompet`
-    FOREIGN KEY (`idDompet`)
-    REFERENCES `shop`.`dompetDigital` (`id`)
+    REFERENCES `shop`.`pengguna` (`id`)
 )
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
@@ -200,6 +197,7 @@ CREATE TABLE IF NOT EXISTS `shop`.`pesanan` (
   `idPengguna` CHAR(36) NOT NULL,
   `idPelapak` CHAR(36) NOT NULL,
   `idPromo` CHAR(36) NOT NULL,
+  `idAlamat` CHAR(36) NOT NULL,
   `idDompet` CHAR(36) NOT NULL,
   `tanggal` DATE NOT NULL,
   `catatan` VARCHAR(255),
@@ -216,9 +214,25 @@ CREATE TABLE IF NOT EXISTS `shop`.`pesanan` (
   CONSTRAINT `fk_idPromoPesanan`
     FOREIGN KEY (`idPromo`)
     REFERENCES `shop`.`promo` (`id`),
+    CONSTRAINT `fk_idAlamatPesanan`
+    FOREIGN KEY (`idAlamat`)
+    REFERENCES `shop`.`alamat` (`id`),
   CONSTRAINT `fk_idDompetPesanan`
     FOREIGN KEY (`idDompet`)
     REFERENCES `shop`.`dompetDigital` (`id`)
+)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+CREATE TABLE IF NOT EXISTS `shop`.`detailPesanan` (
+  `id_pesanan` CHAR(36) NOT NULL,
+  `idProduk` CHAR(36) NOT NULL,
+  `createdAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updatedAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `fk_idProdukPesanan`
+    FOREIGN KEY (`idProduk`)
+    REFERENCES `shop`.`produk` (`id`)
 )
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
@@ -494,8 +508,9 @@ create or replace procedure validasiLoginViaNoTelp(varNoTelp varchar(255),varPas
 begin
 declare cekNoTelp int;
 declare cekPassword int;
-set cekNoTelp=(select noTelp from pengguna where noTelp=varNoTelp);
+set cekNoTelp=(select noTelp from pengguna where noTelp= varNoTelp);
 set cekPassword=(select password from pengguna where noTelp=varNoTelp and password=password(varPassword));
+
 if(cekNoTelp is null) then
 	signal sqlstate '44444'
 	set message_text = 'Nomor telepon yang diinput belum terdaftar';-- lewat dari if ini berarti no telp pasti terdaftar
@@ -504,11 +519,14 @@ else
 		signal sqlstate '44444'
 		set message_text = 'Password yang diinput salah';
 	else
-		select 'Login Berhasil' as Notifikasi;
+		select 'Login Berhasil' as Notifikasi,now() as Waktu;
 	end if;
 end if;
 end <>
 delimiter ;
+
+
+
 call validasiLoginViaEmail('hhhhh@gmail.com','ilham7580');
 call validasiLoginViaEmail('ilham@gmail.com','hhhhhhhhh');
 call validasiLoginViaEmail('ilham@gmail.com','ilham7580');
@@ -528,7 +546,7 @@ else
 		signal sqlstate '44444'
 		set message_text = 'Password yang diinput salah';
 	else
-		select 'Login Berhasil' as Notifikasi;
+		select 'Login Berhasil' as Notifikasi,now() as Waktu, ;
 	end if;
 end if;
 end <>
