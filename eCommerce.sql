@@ -656,15 +656,3 @@ INSERT INTO `shop`.`promo` (`nama`, `deskripsi`, `minTransaksi`, `statusPengguna
 (UUID(), 'Promo Tahun Baru', 'Diskon 40% untuk semua produk', 200000, 'platinum');
 
 
-
-select *from pengguna;
-select *from dompetdigital;
-select *from alamat;
-select *from dompetterhubung;
-select *from keranjang;
-select *from pelapak;
-select *from produk;
-select *from promo;
-select *from promoterhubung;
-select *from kategori;
-select *from pesanan;
