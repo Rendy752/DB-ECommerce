@@ -669,37 +669,71 @@ delimiter <>
 create or replace procedure sebarPromo()
 begin
 declare i int default 0;
+declare j int default 0;
 declare jumlahPengguna int;
+declare jumlahPromo int;
+declare cekLevel int;
+declare idPengguna char(36);
+declare idPromo char(36);
 set jumlahPengguna=(select count(id) from pengguna);
+set jumlahPromo=(select count(id) from promo);
 if (jumlahPengguna=0) then
 	signal sqlstate '44444'
 	set message_text = 'Tidak ada pelanggan';
 else
-	while i<jumlahPengguna do -- 1 2 3
+	while (i<jumlahPengguna) do -- 1 2 3
 		if(i=0) then
-			select * from pengguna limit 0,1;
+			set cekLevel=(select level from pengguna limit 0,1);
+            set idPengguna=(select id from pengguna limit 0,1);
 		else 
-			select * from pengguna limit i,i;
+			set cekLevel=(select level from pengguna limit i,i);
+            set idPengguna=(select id from pengguna limit i,1);
 		end if;
-        
+        set j=0;
+        while(j<jumlahPromo) do
+			if(j=0) then
+				if(cekLevel>=(select levelPengguna from promo limit 0,1)) then
+                    set idPromo=(select id from promo limit 0,1);
+					insert into promoTerhubung (idPengguna,idPromo) values (idPengguna,idPromo);
+                end if;
+			else
+				if(cekLevel>=(select levelPengguna from promo limit i,1)) then
+					set idPromo=(select id from promo limit i,1);
+					insert into promoTerhubung (idPengguna,idPromo) values (idPengguna,idPromo);
+                end if;
+			select (select namaLengkap from pengguna where id=idPengguna),(select nama from promo where id=idPromo);
+            end if;
+		set j=j+1;
+		end while;
 	set i=i+1;
     end while;
 end if;
 end <>
 delimiter ;
-
+call sebarPromo();
+select*from promoTerhubung;
+select id from promo limit 0,1;
+insert into promoTerhubung values ('253cd964-090b-11ee-be34-00155d02be68',(select id from promo limit 0,1));
 select*from pengguna;
 select namaLengkap from pengguna where rowid=1;
 
-call sebarPromo();
 select count(id) from pengguna;
 use shop;
 
 call reset();
+
+create or replace view daftarPromoTerhubung as select pe.namaLengkap as `Nama Pengguna`,pr.nama as `Nama Promo`, 
+pr.minTransaksi as `Minimal Transaksi`,pe.level as `Level Pengguna`,pr.levelPengguna `Level Minimal Promo`
+from promoTerhubung pt join pengguna pe join promo pr 
+where pe.id = pt.idPengguna and pr.id = pt.idPromo;
+select * from daftarPromoTerhubung;
+
+select*from promo;
 select*from pengguna;
 select*from pengguna where password="ilham7580";
 call reset();
 
 select *from pengguna;
-select*from pengguna limit 2,2;
+select*from pengguna limit 2,1;
+select*from promo limit 5,1;
 select * from pengguna order by noTelp asc limit 1;
