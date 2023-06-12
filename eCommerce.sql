@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS `shop`.`pengguna` (
   `email` VARCHAR(255),
   `password` VARCHAR(255) NOT NULL,
   `pin` CHAR(4),
-  `status` VARCHAR(255) NOT NULL,
+  `level` INT NOT NULL,
   `createdAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updatedAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS `shop`.`promo` (
   `nama` VARCHAR(255) NOT NULL,
   `deskripsi` VARCHAR(255) NOT NULL,
   `minTransaksi` DECIMAL(10,2) NOT NULL,
-  `statusPengguna` VARCHAR(255) NOT NULL,
+  `levelPengguna` INT NOT NULL,
   `createdAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updatedAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
@@ -466,7 +466,7 @@ if (cekNoTelp is null and new.noTelp is not null) then
 	else
 		set new.id = uuid();
 		set new.password=password(new.password);
-        set new.status="baru";
+        set new.level=1;
 	end if;
 elseif(cekEmail is null and new.email is not null) then
 	if(char_length(new.password)<8) then
@@ -475,7 +475,7 @@ elseif(cekEmail is null and new.email is not null) then
 	else
 		set new.id = uuid();
 		set new.password=password(new.password);
-        set new.status="bronze";
+        set new.level=1;
 	end if;
 else
 	signal sqlstate '44444'
@@ -483,17 +483,24 @@ else
 end if;
 end <>
 delimiter ;
-
+select*from pengguna;
 INSERT INTO `shop`.`pengguna` (`namaLengkap`, `noTelp`, `email`, `password`, `pin`) VALUES 
 ('Ilham', '08129022310', 'ilham@gmail.com', 'ilham7580', '7580');
+
 INSERT INTO `shop`.`pengguna` (`namaLengkap`, `email`, `password`) VALUES 
 ('Ilham', 'ilham@gmail.com', 'ilham7580');-- email sama
+
 INSERT INTO `shop`.`pengguna` (`namaLengkap`, `noTelp`, `password`) VALUES 
 ('Ilham', '08129022310', 'ilham7580');-- no telepon sama
+
 INSERT INTO `shop`.`pengguna` (`namaLengkap`, `noTelp`, `password`) VALUES 
 ('Laura', '085367818912', 'laura12');-- password <8 digit
+
 INSERT INTO `shop`.`pengguna` (`namaLengkap`, `noTelp`,`email`, `password`) VALUES 
 ('Laura', '085367818912', 'Laura22@gmail.com','laura123');
+
+INSERT INTO `shop`.`pengguna` (`namaLengkap`, `noTelp`,`email`, `password`, `pin`) VALUES 
+('Budi', '0846635353553', 'budi343@gmail.com','budi6565','6565');
 
 select*from pengguna;
 call reset();
@@ -575,10 +582,8 @@ create or replace trigger addPelapak
 before insert on pelapak for each row
 begin
 declare cekPelapak int;
-declare cekLokasi int;
-set cekPelapak=(select nama from pelapak where nama=new.nama);
-set cekLokasi=(select lokasi from pelapak where nama=new.nama and lokasi=new.lokasi);
-if(cekPelapak is not null and cekLokasi is not null) then
+set cekPelapak=(select nama from pelapak where nama=new.nama and lokasi=new.lokasi);
+if(cekPelapak is not null) then
 	signal sqlstate '44444'
 	set message_text = 'Pelapak sudah ada, tidak bisa menambah data';
 end if;
@@ -631,11 +636,11 @@ INSERT INTO `shop`.`dompetDigital` (`nama`) VALUES ('DANA');
 select*from dompetdigital;
 
 delimiter <>
-create trigger addPromo
+create or replace trigger addPromo
 before insert on promo for each row
 begin
 declare cekPromo int;
-set cekPromo=(select nama from dompetdigital where nama=new.nama);
+set cekPromo=(select nama from promo where nama=new.nama and minTransaksi=new.minTransaksi);
 if(cekPromo is not null) then
 	signal sqlstate '44444'
 	set message_text = 'Promo sudah ada, tidak dapat menambah data';
@@ -644,15 +649,57 @@ set new.id = uuid();
 end <>
 delimiter ;
 
-INSERT INTO `shop`.`promo` (`nama`, `deskripsi`, `minTransaksi`, `statusPengguna`) VALUES 
-('Promo Lebaran', 'Diskon 20% untuk semua produk', 100000, 'bronze');
--- Dummy 2
-(UUID(), 'Promo Natal', 'Diskon 10% untuk semua produk', 200000, 'silver'),
--- Dummy 3
-(UUID(), 'Promo 6.6', 'Diskon 20% untuk semua produk', 400000, 'gold'),
--- Dummy 4
-(UUID(), 'Promo Potongan', 'Diskon 10% Potongan Untuk Produk Yang Dpilih', 0, 'bronze'),
--- Dummy 5
-(UUID(), 'Promo Tahun Baru', 'Diskon 40% untuk semua produk', 200000, 'platinum');
+INSERT INTO `shop`.`promo` (`nama`, `deskripsi`, `minTransaksi`, `levelPengguna`) VALUES 
+('Promo Lebaran', 'Diskon 20% untuk semua produk', 100000, 1);
+INSERT INTO `shop`.`promo` (`nama`, `deskripsi`, `minTransaksi`, `levelPengguna`) VALUES 
+('Promo Natal', 'Diskon 10% untuk semua produk', 200000, 2);
+INSERT INTO `shop`.`promo` (`nama`, `deskripsi`, `minTransaksi`, `levelPengguna`) VALUES 
+('Promo Lebaran', 'Diskon 30% untuk semua produk', 100000, 1);
+INSERT INTO `shop`.`promo` (`nama`, `deskripsi`, `minTransaksi`, `levelPengguna`) VALUES 
+('Promo Lebaran', 'Diskon 30% untuk semua produk', 150000, 1);
+INSERT INTO `shop`.`promo` (`nama`, `deskripsi`, `minTransaksi`, `levelPengguna`) VALUES 
+('Promo 6.6', 'Diskon 20% untuk semua produk', 400000, 3);
+INSERT INTO `shop`.`promo` (`nama`, `deskripsi`, `minTransaksi`, `levelPengguna`) VALUES 
+('Promo Potongan', 'Diskon 10% Potongan Untuk Produk Yang Dpilih', 0, 1);
+INSERT INTO `shop`.`promo` (`nama`, `deskripsi`, `minTransaksi`, `levelPengguna`) VALUES 
+('Promo Tahun Baru', 'Diskon 40% untuk semua produk', 200000, 3);
+select*from promo;
 
+delimiter <>
+create or replace procedure sebarPromo()
+begin
+declare i int default 0;
+declare jumlahPengguna int;
+set jumlahPengguna=(select count(id) from pengguna);
+if (jumlahPengguna=0) then
+	signal sqlstate '44444'
+	set message_text = 'Tidak ada pelanggan';
+else
+	while i<jumlahPengguna do -- 1 2 3
+		if(i=0) then
+			select * from pengguna limit 0,1;
+		else 
+			select * from pengguna limit i,i;
+		end if;
+        
+	set i=i+1;
+    end while;
+end if;
+end <>
+delimiter ;
 
+select*from pengguna;
+select namaLengkap from pengguna where rowid=1;
+
+call sebarPromo();
+select count(id) from pengguna;
+use shop;
+
+call reset();
+select*from pengguna;
+select*from pengguna where password="ilham7580";
+call reset();
+
+select *from pengguna;
+select*from pengguna limit 2,2;
+select * from pengguna order by noTelp asc limit 1;
