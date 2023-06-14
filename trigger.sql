@@ -103,6 +103,7 @@ if(cekPelapak is not null) then
 	set message_text = 'Pelapak dengan lokasi yang sama sudah ada, tidak bisa menambah data';
 end if;
 set new.id = uuid();
+set new.rating=0;
 end <>
 delimiter ;
 
@@ -192,7 +193,7 @@ set varIdPengguna=(select id from pengguna where username=new.idPengguna);
 set cekAlamat=(select count(*) from alamat where idPengguna=varIdPengguna and alamat=new.alamat);
 if(varIdPengguna is null) then
 	signal sqlstate '44444'
-	set message_text = 'Id Pengguna tidak diketahui, tidak dapat menambah data';
+	set message_text = 'Pengguna tidak diketahui, tidak dapat menambah data';
 elseif(cekAlamat!=0) then
 	signal sqlstate '44444'
 	set message_text = 'Alamat sudah ada, tidak dapat menambah data';
@@ -236,7 +237,7 @@ set varIdDompetDigital=(select id from dompetDigital where nama=new.idDompet);
 set cekDompetPengguna=(select count(*) from dompetTerhubung where idPengguna=varIdPengguna and idDompet=varIdDompetDigital);
 if(varIdPengguna is null or varIdDompetDigital is null) then
 	signal sqlstate '44444'
-	set message_text = 'Id pengguna atau Id dompet digital tidak diketahui, tidak dapat menambah data';
+	set message_text = 'Pengguna atau dompet digital tidak diketahui, tidak dapat menambah data';
 elseif(cekDompetPengguna!=0) then
 	signal sqlstate '44444'
 	set message_text = 'Pengguna sudah memiliki dompet terkait';
@@ -266,3 +267,56 @@ INSERT INTO `shop`.`dompetTerhubung` (`idPengguna`, `idDompet`) values
 ('budiz','gopay');
 INSERT INTO `shop`.`dompetTerhubung` (`idPengguna`, `idDompet`) values
 ('budiz','shopeepay');
+
+delimiter <>
+create or replace trigger addProduk
+before insert on produk for each row
+begin
+declare varIdKategori char(36);
+declare varIdPelapak char(36);
+declare cekProduk int;
+set varIdKategori=(select id from kategori where nama=new.idKategori);
+set varIdPelapak=(select id from pelapak where nama=new.idPelapak);
+set cekProduk=(select count(*) from produk where idPelapak=varIdPelapak and nama=new.nama);
+if(varIdKategori is null or varIdPelapak is null) then
+	signal sqlstate '44444'
+	set message_text = 'Kategori atau pelapak tidak diketahui, tidak dapat menambah data';
+elseif(cekProduk!=0) then
+	signal sqlstate '44444'
+	set message_text = 'Produk sudah ada, tidak dapat menambah data';
+else
+	if(new.kondisi not in("Baru","Lama","Bekas")) then
+		signal sqlstate '44444'
+		set message_text = 'Kondisi tidak diketahui, tidak dapat menambah data';
+	elseif(new.asal not in("Lokal","Impor")) then
+		signal sqlstate '44444'
+		set message_text = 'Asal tidak diketahui, tidak dapat menambah data';
+	else
+		set new.id=uuid();
+		set new.idPelapak=varIdPelapak;
+		set new.idKategori=varIdKategori;
+		set new.rating=0;
+		set new.ulasan=0;
+		set new.terjual=0;
+	end if;
+end if;
+end <>
+delimiter ;
+
+INSERT INTO `shop`.`produk` (`idKategori`, `idPelapak`, `nama`, `stok`, `kondisi`, `berat`, `asal`, `deskripsi`, `harga`) VALUES 
+('elektronik', 'laptop official','Laptop Asus ZenForce', 20,'Baru', 2000, 'Lokal', 'Laptop Asus Zenforce Ram 12GB', 7000000); -- kategori / pelapak tidak ada
+INSERT INTO `shop`.`produk` (`idKategori`, `idPelapak`, `nama`, `stok`, `kondisi`, `berat`, `asal`, `deskripsi`, `harga`) VALUES 
+('elektronik','asus official','Laptop Asus ZenForce', 20,'Baru', 2000, 'Lokal', 'Laptop Asus Zenforce Ram 12GB', 7000000);
+INSERT INTO `shop`.`produk` (`idKategori`, `idPelapak`, `nama`, `stok`, `kondisi`, `berat`, `asal`, `deskripsi`, `harga`) VALUES 
+('fashion', 'zara', 'Kemeja Denim', 50, 'sangat baru', 100, 'lokal', 'Kemeja Denim Pria Ukuran M', 350000); -- kondisi tidak diketahui
+INSERT INTO `shop`.`produk` (`idKategori`, `idPelapak`, `nama`, `stok`, `kondisi`, `berat`, `asal`, `deskripsi`, `harga`) VALUES 
+('fashion', 'zara', 'Kemeja Denim', 50, 'baru', 100, 'ekspor', 'Kemeja Denim Pria Ukuran M', 350000); -- asal tidak diketahui
+INSERT INTO `shop`.`produk` (`idKategori`, `idPelapak`, `nama`, `stok`, `kondisi`, `berat`, `asal`, `deskripsi`, `harga`) VALUES 
+('fashion', 'zara','Kemeja Denim', 50, 'baru', 100, 'lokal', 'Kemeja Denim Pria Ukuran M', 350000);
+INSERT INTO `shop`.`produk` (`idKategori`, `idPelapak`, `nama`, `stok`, `kondisi`, `berat`, `asal`, `deskripsi`, `harga`) VALUES 
+('fashion',' h&m', 'Celana Jeans Slim Fit', 40, 'baru', 200, 'lokal', 'Celana Jeans Slim Fit Warna Biru', 250000);
+INSERT INTO `shop`.`produk` (`idKategori`, `idPelapak`, `nama`, `stok`, `kondisi`, `berat`, `asal`, `deskripsi`, `harga`) VALUES 
+('fashion', 'nike', 'Sepatu Nike Running', 45, 'baru', 500, 'impor', 'Sepatu Nike Running Pria', 800000);
+INSERT INTO `shop`.`produk` (`idKategori`, `idPelapak`, `nama`, `stok`, `kondisi`, `berat`, `asal`, `deskripsi`, `harga`) VALUES 
+('elektronik', 'sonny official', 'Headphone Sony', 25, 'baru', 300, 'impor', 'Headphone Sony Noise-Canceling', 1200000);
+select*from produk;
