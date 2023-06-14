@@ -88,3 +88,29 @@ end if;
 end <>
 delimiter ;
 call sebarPromo();
+
+delimiter <>
+create or replace procedure lihatPromoPengguna(varUsername varchar(255))
+begin
+	declare varIdPengguna char(36);
+    set varIdPengguna=(select id from pengguna where username=varUsername);
+	if(varIdPengguna is null) then
+		signal sqlstate '44444'
+		set message_text = 'Username belum terdaftar!';
+	else
+		if((select count(*) from promoTerhubung where idPengguna=varIdPengguna)=0) then
+			signal sqlstate '44444'
+			set message_text = 'Pengguna terkait belum mendaftarkan alamat!';
+		else
+			select pr.nama as `Nama Promo`, pr.deskripsi `Deskripsi`, pr.minTransaksi as `Minimal Transaksi`
+			from promoTerhubung pt join pengguna pe join promo pr where pe.id = pt.idPengguna and pr.id = pt.idPromo and pe.username=varUsername;
+		end if;
+	end if;
+end <>
+delimiter ;
+
+call lihatPromoPengguna('budiz');
+call lihatPromoPengguna('lauraz');
+call lihatPromoPengguna('ilhamz');
+call lihatPromoPengguna('santoso');
+call lihatPromoPengguna('liliaz');
