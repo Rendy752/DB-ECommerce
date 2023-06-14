@@ -100,32 +100,34 @@ declare cekPelapak int;
 set cekPelapak=(select nama from pelapak where nama=new.nama and lokasi=new.lokasi);
 if(cekPelapak is not null) then
 	signal sqlstate '44444'
-	set message_text = 'Pelapak sudah ada, tidak bisa menambah data';
+	set message_text = 'Pelapak dengan lokasi yang sama sudah ada, tidak bisa menambah data';
 end if;
 set new.id = uuid();
 end <>
 delimiter ;
-select*from pelapak;
-INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`, `feedbackPositif`, `waktuProsesTercepat`, `waktuProsesTerlama`) VALUES 
-('Asus Official', 'Jakarta', 'positif', 2, 5);
-INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`, `feedbackPositif`, `waktuProsesTercepat`, `waktuProsesTerlama`) VALUES 
-('Zara', 'Bandung', 'positif', 1, 3);
-INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`, `feedbackPositif`, `waktuProsesTercepat`, `waktuProsesTerlama`) VALUES 
-('Asus Official', 'Jakarta', 'positif', 4, 6);
-INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`, `feedbackPositif`, `waktuProsesTercepat`, `waktuProsesTerlama`) VALUES 
-('Indonesia Merk', 'Jakarta', 'positif', 3, 5);
-INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`, `feedbackPositif`, `waktuProsesTercepat`, `waktuProsesTerlama`) VALUES 
-('Xyz Shop', 'Bandung', 'positif', 20, 24);
-INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`, `feedbackPositif`, `waktuProsesTercepat`, `waktuProsesTerlama`) VALUES 
-('H&M', 'Jakarta', 'positif', 1, 2);
-INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`, `feedbackPositif`, `waktuProsesTercepat`, `waktuProsesTerlama`) VALUES 
-('Gucci', 'Kalimantan', 'positif', 1, 3);
-INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`, `feedbackPositif`, `waktuProsesTercepat`, `waktuProsesTerlama`) VALUES 
-('Sonny Official', 'Jakarta', 'positif', 2, 4);
-INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`, `feedbackPositif`, `waktuProsesTercepat`, `waktuProsesTerlama`) VALUES 
-('Samsung Official', 'Jakarta', 'negatif', 1, 3);
-INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`, `feedbackPositif`, `waktuProsesTercepat`, `waktuProsesTerlama`) VALUES 
-('Samsung Official', 'Jakarta', 'negatif', 1, 6);
+
+INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES 
+('Asus Official', 'Jakarta');
+INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES 
+('Zara', 'Bandung');
+INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES 
+('Asus Official', 'Jakarta');
+INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES 
+('Indonesia Merk', 'Jakarta');
+INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES 
+('Xyz Shop', 'Bandung');
+INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES 
+('H&M', 'Jakarta');
+INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES 
+('Gucci', 'Kalimantan');
+INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES 
+('Sonny Official','Semarang');
+INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES 
+('Samsung Official', 'Jakarta');
+INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES 
+('Samsung Official', 'Jakarta');
+INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES 
+('Nike', 'Bogor');
 select*from pelapak;
 
 delimiter <>
@@ -187,11 +189,11 @@ begin
 declare varIdPengguna char(36);
 declare cekAlamat int;
 set varIdPengguna=(select id from pengguna where username=new.idPengguna);
-set cekAlamat=(select alamat from alamat where idPengguna=varIdPengguna and alamat=new.alamat);
+set cekAlamat=(select count(*) from alamat where idPengguna=varIdPengguna and alamat=new.alamat);
 if(varIdPengguna is null) then
 	signal sqlstate '44444'
-	set message_text = 'Id Pengguna tidak dikatahui, tidak dapat menambah data';
-elseif(cekAlamat is not null) then
+	set message_text = 'Id Pengguna tidak diketahui, tidak dapat menambah data';
+elseif(cekAlamat!=0) then
 	signal sqlstate '44444'
 	set message_text = 'Alamat sudah ada, tidak dapat menambah data';
 end if;
@@ -221,3 +223,46 @@ INSERT INTO `shop`.`alamat` (`idPengguna`, `alamat`, `alamatSebagai`, `namaPener
 INSERT INTO `shop`.`alamat` (`idPengguna`, `alamat`, `alamatSebagai`, `namaPenerima`, `noTelp`, `kecamatan`, `kota`, `provinsi`, `kodePos`) values
 ('ilhamz','Jl. Apel No. 789', 'rumah', 'Edi', '085367818912', 'Kec. Apel', 'Kota Palembang', 'Provinsi Sumatera Selatan', 32513);
 select*from alamat;
+
+delimiter <>
+create or replace trigger addDompetTerhubung
+before insert on dompetTerhubung for each row
+begin
+declare varIdPengguna char(36);
+declare varIdDompetDigital char(36);
+declare cekDompetPengguna int;
+set varIdPengguna=(select id from pengguna where username=new.idPengguna);
+set varIdDompetDigital=(select id from dompetDigital where nama=new.idDompet);
+set cekDompetPengguna=(select count(*) from dompetTerhubung where idPengguna=varIdPengguna and idDompet=varIdDompetDigital);
+if(varIdPengguna is null or varIdDompetDigital is null) then
+	signal sqlstate '44444'
+	set message_text = 'Id pengguna atau Id dompet digital tidak diketahui, tidak dapat menambah data';
+elseif(cekDompetPengguna!=0) then
+	signal sqlstate '44444'
+	set message_text = 'Pengguna sudah memiliki dompet terkait';
+end if;
+set new.idPengguna=varIdPengguna;
+set new.idDompet=varIdDompetDigital;
+end <>
+delimiter ;
+
+select*from pengguna;
+select*from dompetdigital;
+select*from dompetTerhubung;
+
+INSERT INTO `shop`.`dompetTerhubung` (`idPengguna`, `idDompet`) values
+('susanto','ovo');
+INSERT INTO `shop`.`dompetTerhubung` (`idPengguna`, `idDompet`) values
+('ilhamz','bri');
+INSERT INTO `shop`.`dompetTerhubung` (`idPengguna`, `idDompet`) values
+('ilhamz','ovo');
+INSERT INTO `shop`.`dompetTerhubung` (`idPengguna`, `idDompet`) values
+('ilhamz','dana');
+INSERT INTO `shop`.`dompetTerhubung` (`idPengguna`, `idDompet`) values
+('lauraz','dana');
+INSERT INTO `shop`.`dompetTerhubung` (`idPengguna`, `idDompet`) values
+('budiz','bca');
+INSERT INTO `shop`.`dompetTerhubung` (`idPengguna`, `idDompet`) values
+('budiz','gopay');
+INSERT INTO `shop`.`dompetTerhubung` (`idPengguna`, `idDompet`) values
+('budiz','shopeepay');
