@@ -251,22 +251,14 @@ select*from pengguna;
 select*from dompetdigital;
 select*from dompetTerhubung;
 
-INSERT INTO `shop`.`dompetTerhubung` (`idPengguna`, `idDompet`) values
-('susanto','ovo');
-INSERT INTO `shop`.`dompetTerhubung` (`idPengguna`, `idDompet`) values
-('ilhamz','bri');
-INSERT INTO `shop`.`dompetTerhubung` (`idPengguna`, `idDompet`) values
-('ilhamz','ovo');
-INSERT INTO `shop`.`dompetTerhubung` (`idPengguna`, `idDompet`) values
-('ilhamz','dana');
-INSERT INTO `shop`.`dompetTerhubung` (`idPengguna`, `idDompet`) values
-('lauraz','dana');
-INSERT INTO `shop`.`dompetTerhubung` (`idPengguna`, `idDompet`) values
-('budiz','bca');
-INSERT INTO `shop`.`dompetTerhubung` (`idPengguna`, `idDompet`) values
-('budiz','gopay');
-INSERT INTO `shop`.`dompetTerhubung` (`idPengguna`, `idDompet`) values
-('budiz','shopeepay');
+INSERT INTO `shop`.`dompetTerhubung` (`idPengguna`, `idDompet`) values ('susanto','ovo');
+INSERT INTO `shop`.`dompetTerhubung` (`idPengguna`, `idDompet`) values ('ilhamz','bri');
+INSERT INTO `shop`.`dompetTerhubung` (`idPengguna`, `idDompet`) values ('ilhamz','ovo');
+INSERT INTO `shop`.`dompetTerhubung` (`idPengguna`, `idDompet`) values ('ilhamz','dana');
+INSERT INTO `shop`.`dompetTerhubung` (`idPengguna`, `idDompet`) values ('lauraz','dana');
+INSERT INTO `shop`.`dompetTerhubung` (`idPengguna`, `idDompet`) values ('budiz','bca');
+INSERT INTO `shop`.`dompetTerhubung` (`idPengguna`, `idDompet`) values ('budiz','gopay');
+INSERT INTO `shop`.`dompetTerhubung` (`idPengguna`, `idDompet`) values ('budiz','shopeepay');
 
 delimiter <>
 create or replace trigger addProduk
@@ -277,7 +269,7 @@ declare varIdPelapak char(36);
 declare cekProduk int;
 set varIdKategori=(select id from kategori where nama=new.idKategori);
 set varIdPelapak=(select id from pelapak where nama=new.idPelapak);
-set cekProduk=(select count(*) from produk where idPelapak=varIdPelapak and nama=new.nama);
+set cekProduk=(select count(*) from produk where nama=new.nama);
 if(varIdKategori is null or varIdPelapak is null) then
 	signal sqlstate '44444'
 	set message_text = 'Kategori atau pelapak tidak diketahui, tidak dapat menambah data';
@@ -320,3 +312,46 @@ INSERT INTO `shop`.`produk` (`idKategori`, `idPelapak`, `nama`, `stok`, `kondisi
 INSERT INTO `shop`.`produk` (`idKategori`, `idPelapak`, `nama`, `stok`, `kondisi`, `berat`, `asal`, `deskripsi`, `harga`) VALUES 
 ('elektronik', 'sonny official', 'Headphone Sony', 25, 'baru', 300, 'impor', 'Headphone Sony Noise-Canceling', 1200000);
 select*from produk;
+
+delimiter <>
+create or replace trigger addProdukFavorit
+before insert on produkFavorit for each row
+begin
+declare varIdPengguna char(36);
+declare varIdProduk char(36);
+declare cekProdukFavorit int;
+set varIdPengguna=(select id from pengguna where username=new.idPengguna);
+set varIdProduk=(select id from produk where nama=new.idProduk);
+set cekProdukFavorit=(select count(*) from produkFavorit where idPengguna=varIdPengguna and idProduk=varIdProduk);
+if(varIdPengguna is null) then
+	signal sqlstate '44444'
+	set message_text = 'Pengguna tidak diketahui, tidak dapat menambah data';
+elseif(varIdProduk is null) then
+	signal sqlstate '44444'
+	set message_text = 'Produk tidak diketahui, tidak dapat menambah data';
+elseif(cekProdukFavorit!=0) then
+	signal sqlstate '44444'
+	set message_text = 'Produk sudah dalam list favorit, tidak dapat menambah data';
+else
+	set new.idPengguna=varIdPengguna;
+    set new.idProduk=varIdProduk;
+end if;
+end <>
+delimiter ;
+
+select*from pengguna;
+select*from produk;
+select*from produkfavorit;
+INSERT INTO `shop`.`produkFavorit` (`idPengguna`, `idProduk`) VALUES ('tono','Headphone Sony');
+INSERT INTO `shop`.`produkFavorit` (`idPengguna`, `idProduk`) VALUES ('ilhamz','Headphone Asus');
+INSERT INTO `shop`.`produkFavorit` (`idPengguna`, `idProduk`) VALUES ('ilhamz','Headphone Sony');
+INSERT INTO `shop`.`produkFavorit` (`idPengguna`, `idProduk`) VALUES ('ilhamz','Kemeja Denim');
+INSERT INTO `shop`.`produkFavorit` (`idPengguna`, `idProduk`) VALUES ('ilhamz','Kemeja Denim');
+INSERT INTO `shop`.`produkFavorit` (`idPengguna`, `idProduk`) VALUES ('ilhamz','Sepatu Nike Running');
+INSERT INTO `shop`.`produkFavorit` (`idPengguna`, `idProduk`) VALUES ('lauraz','Kemeja Denim');
+INSERT INTO `shop`.`produkFavorit` (`idPengguna`, `idProduk`) VALUES ('budiz','Kemeja Denim');
+INSERT INTO `shop`.`produkFavorit` (`idPengguna`, `idProduk`) VALUES ('liliaz','Kemeja Denim');
+INSERT INTO `shop`.`produkFavorit` (`idPengguna`, `idProduk`) VALUES ('budiz','Sepatu Nike Running');
+INSERT INTO `shop`.`produkFavorit` (`idPengguna`, `idProduk`) VALUES ('liliaz','Headphone Sony');
+INSERT INTO `shop`.`produkFavorit` (`idPengguna`, `idProduk`) VALUES ('ilhamz','Laptop Asus ZenForce');
+INSERT INTO `shop`.`produkFavorit` (`idPengguna`, `idProduk`) VALUES ('lauraz','Headphone Sony');

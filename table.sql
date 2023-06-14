@@ -159,7 +159,7 @@ CREATE TABLE IF NOT EXISTS `shop`.`produk` (
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
 
-CREATE TABLE IF NOT EXISTS `shop`.`barangFavorit` (
+CREATE TABLE IF NOT EXISTS `shop`.`produkFavorit` (
   `idPengguna` CHAR(36) NOT NULL,
   `idProduk` CHAR(36) NOT NULL,
   `createdAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

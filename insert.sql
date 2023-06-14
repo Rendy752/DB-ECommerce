@@ -1,10 +1,3 @@
--- Table barangFavorit
-INSERT INTO `shop`.`barangFavorit` (`idPengguna`, `idProduk`)
- SELECT 
- (SELECT id FROM shop.pengguna WHERE namaLengkap = "Ilham"),
- (SELECT id FROM shop.produk WHERE nama = "Headphone Sony" );
- 
-
 -- Table keranjang
 INSERT INTO `shop`.`keranjang` (`idPengguna`, `idProduk`, `jumlah`)
 -- Dummy 1
