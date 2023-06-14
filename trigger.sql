@@ -63,6 +63,9 @@ INSERT INTO `shop`.`pengguna` (`namaLengkap`, `username`, `noTelp`,`email`, `pas
 
 INSERT INTO `shop`.`pengguna` (`namaLengkap`, `username`, `noTelp`,`email`, `password`, `pin`) VALUES 
 ('Budi', 'budiz','0846635353553', 'budi343@gmail.com','budi6565','6565');
+
+INSERT INTO `shop`.`pengguna` (`namaLengkap`, `username`, `noTelp`,`email`, `password`, `pin`) VALUES 
+('Lilia', 'liliaz','084873847384', 'lilia444@gmail.com','lilia6565','4444');
 select*from pengguna;
 
 
@@ -176,3 +179,45 @@ INSERT INTO `shop`.`promo` (`nama`, `deskripsi`, `minTransaksi`, `levelPengguna`
 INSERT INTO `shop`.`promo` (`nama`, `deskripsi`, `minTransaksi`, `levelPengguna`) VALUES 
 ('Promo Tahun Baru', 'Diskon 40% untuk semua produk', 200000, 3);
 select*from promo;
+
+delimiter <>
+create or replace trigger addAlamat
+before insert on alamat for each row
+begin
+declare varIdPengguna char(36);
+declare cekAlamat int;
+set varIdPengguna=(select id from pengguna where username=new.idPengguna);
+set cekAlamat=(select alamat from alamat where idPengguna=varIdPengguna and alamat=new.alamat);
+if(varIdPengguna is null) then
+	signal sqlstate '44444'
+	set message_text = 'Id Pengguna tidak dikatahui, tidak dapat menambah data';
+elseif(cekAlamat is not null) then
+	signal sqlstate '44444'
+	set message_text = 'Alamat sudah ada, tidak dapat menambah data';
+end if;
+set new.id = uuid();
+set new.idPengguna=varIdPengguna;
+end <>
+delimiter ;
+
+INSERT INTO `shop`.`alamat` (`idPengguna`, `alamat`, `alamatSebagai`, `namaPenerima`, `noTelp`, `kecamatan`, `kota`, `provinsi`, `kodePos`) values
+('ilhamz','Jl. Rambutan No. 123', 'rumah', 'Ilham', '08129022310', 'Kec. Rambutan', 'Kota Palembang', 'Provinsi Sumatera Selatan', 32511);
+
+INSERT INTO `shop`.`alamat` (`idPengguna`, `alamat`, `alamatSebagai`, `namaPenerima`, `noTelp`, `kecamatan`, `kota`, `provinsi`, `kodePos`) values
+('budiz','Jl. Mangga No. 456', 'kantor', 'Citra', '087638172311', 'Kec. Mangga', 'Kota Palembang', 'Provinsi Sumatera Selatan', 32512);
+
+INSERT INTO `shop`.`alamat` (`idPengguna`, `alamat`, `alamatSebagai`, `namaPenerima`, `noTelp`, `kecamatan`, `kota`, `provinsi`, `kodePos`) values
+('lauraz','Jl. Rambutan No. 124', 'rumah', 'Santoso', '08878797979', 'Kec. Rambutan', 'Kota Palembang', 'Provinsi Sumatera Selatan', 32511);
+
+INSERT INTO `shop`.`alamat` (`idPengguna`, `alamat`, `alamatSebagai`, `namaPenerima`, `noTelp`, `kecamatan`, `kota`, `provinsi`, `kodePos`) values
+('laurazz','Jl. Apel No. 789', 'rumah', 'Laura', '085367818912', 'Kec. Apel', 'Kota Palembang', 'Provinsi Sumatera Selatan', 32513); -- id pengguna tidak diketahui
+
+INSERT INTO `shop`.`alamat` (`idPengguna`, `alamat`, `alamatSebagai`, `namaPenerima`, `noTelp`, `kecamatan`, `kota`, `provinsi`, `kodePos`) values
+('budiz','Jl. Mangga No. 456', 'rumah', 'Windah', '085378908716', 'Kec. Jeruk', 'Kota Palembang', 'Provinsi Sumatera Selatan', 32514); -- alamat sudah ada di pengguna yang sama
+
+INSERT INTO `shop`.`alamat` (`idPengguna`, `alamat`, `alamatSebagai`, `namaPenerima`, `noTelp`, `kecamatan`, `kota`, `provinsi`, `kodePos`) values
+('lauraz','Jl. Manggis No. 202', 'rumah', 'Windah', '085379809112', 'Kec. Manggis', 'Kota Palembang', 'Provinsi Sumatera Selatan', 32515);
+
+INSERT INTO `shop`.`alamat` (`idPengguna`, `alamat`, `alamatSebagai`, `namaPenerima`, `noTelp`, `kecamatan`, `kota`, `provinsi`, `kodePos`) values
+('ilhamz','Jl. Apel No. 789', 'rumah', 'Edi', '085367818912', 'Kec. Apel', 'Kota Palembang', 'Provinsi Sumatera Selatan', 32513);
+select*from alamat;
