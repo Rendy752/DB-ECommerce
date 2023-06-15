@@ -311,8 +311,10 @@ INSERT INTO `shop`.`produk` (`idKategori`, `idPelapak`, `nama`, `stok`, `kondisi
 ('fashion', 'nike', 'Sepatu Nike Running', 45, 'baru', 500, 'impor', 'Sepatu Nike Running Pria', 800000);
 INSERT INTO `shop`.`produk` (`idKategori`, `idPelapak`, `nama`, `stok`, `kondisi`, `berat`, `asal`, `deskripsi`, `harga`) VALUES 
 ('elektronik', 'sonny official', 'Headphone Sony', 25, 'baru', 300, 'impor', 'Headphone Sony Noise-Canceling', 1200000);
+INSERT INTO `shop`.`produk` (`idKategori`, `idPelapak`, `nama`, `stok`, `kondisi`, `berat`, `asal`, `deskripsi`, `harga`) VALUES 
+('perfume', 'zara', 'Carolina Herera', 0, 'bekas', 350, 'impor', 'Jasmine scent, long lasting perfume with an unexpected twist of sensuality and mystery', 900000);
 select*from produk;
-
+select*from kategori;
 delimiter <>
 create or replace trigger addProdukFavorit
 before insert on produkFavorit for each row
@@ -355,3 +357,54 @@ INSERT INTO `shop`.`produkFavorit` (`idPengguna`, `idProduk`) VALUES ('budiz','S
 INSERT INTO `shop`.`produkFavorit` (`idPengguna`, `idProduk`) VALUES ('liliaz','Headphone Sony');
 INSERT INTO `shop`.`produkFavorit` (`idPengguna`, `idProduk`) VALUES ('ilhamz','Laptop Asus ZenForce');
 INSERT INTO `shop`.`produkFavorit` (`idPengguna`, `idProduk`) VALUES ('lauraz','Headphone Sony');
+INSERT INTO `shop`.`produkFavorit` (`idPengguna`, `idProduk`) VALUES ('ilhamz','Carolina Herera');
+
+delimiter <>
+create or replace trigger addKeranjang
+before insert on keranjang for each row
+begin
+declare varIdPengguna char(36);
+declare varIdProduk char(36);
+declare cekKeranjang int;
+declare cekStok int;
+set varIdPengguna=(select id from pengguna where username=new.idPengguna);
+set varIdProduk=(select id from produk where nama=new.idProduk);
+set cekKeranjang=(select count(*) from keranjang where idPengguna=varIdPengguna and idProduk=varIdProduk);
+set cekStok=(select stok from produk where id=varIdProduk);
+if(varIdPengguna is null) then
+	signal sqlstate '44444'
+	set message_text = 'Pengguna tidak diketahui, tidak dapat menambah data';
+elseif(varIdProduk is null) then
+	signal sqlstate '44444'
+	set message_text = 'Produk tidak diketahui, tidak dapat menambah data';
+elseif(cekKeranjang!=0) then
+	signal sqlstate '44444'
+	set message_text = 'Produk sudah dalam list keranjang, tidak dapat menambah data';
+elseif(cekStok=0) then
+	signal sqlstate '44444'
+	set message_text = 'Stok kosong, tidak dapat menambah data';
+elseif(new.jumlah>cekStok) then
+	signal sqlstate '44444'
+	set message_text = 'Stok tidak tersedia, tidak dapat menambah data';
+else
+	set new.idPengguna=varIdPengguna;
+    set new.idProduk=varIdProduk;
+end if;
+end <>
+delimiter ;
+
+INSERT INTO `shop`.`keranjang` (`idPengguna`, `idProduk`,`jumlah`) VALUES ('tono','Headphone Sony',20);
+INSERT INTO `shop`.`keranjang` (`idPengguna`, `idProduk`,`jumlah`) VALUES ('ilhamz','Headphone Asus',30);
+INSERT INTO `shop`.`keranjang` (`idPengguna`, `idProduk`,`jumlah`) VALUES ('ilhamz','Carolina Herera',40);
+INSERT INTO `shop`.`keranjang` (`idPengguna`, `idProduk`,`jumlah`) VALUES ('ilhamz','Kemeja Denim',51);
+INSERT INTO `shop`.`keranjang` (`idPengguna`, `idProduk`,`jumlah`) VALUES ('ilhamz','Kemeja Denim',30);
+INSERT INTO `shop`.`keranjang` (`idPengguna`, `idProduk`,`jumlah`) VALUES ('ilhamz','Kemeja Denim',1);
+INSERT INTO `shop`.`keranjang` (`idPengguna`, `idProduk`,`jumlah`) VALUES ('ilhamz','Sepatu Nike Running',20);
+INSERT INTO `shop`.`keranjang` (`idPengguna`, `idProduk`,`jumlah`) VALUES ('lauraz','Kemeja Denim',2);
+INSERT INTO `shop`.`keranjang` (`idPengguna`, `idProduk`,`jumlah`) VALUES ('budiz','Headphone Sony',5);
+INSERT INTO `shop`.`keranjang` (`idPengguna`, `idProduk`,`jumlah`) VALUES ('liliaz','Headphone Sony',20);
+INSERT INTO `shop`.`keranjang` (`idPengguna`, `idProduk`,`jumlah`) VALUES ('budiz','Sepatu Nike Running',1);
+INSERT INTO `shop`.`keranjang` (`idPengguna`, `idProduk`,`jumlah`) VALUES ('liliaz','Laptop Asus ZenForce',1);
+INSERT INTO `shop`.`keranjang` (`idPengguna`, `idProduk`,`jumlah`) VALUES ('ilhamz','Laptop Asus ZenForce',2);
+INSERT INTO `shop`.`keranjang` (`idPengguna`, `idProduk`,`jumlah`) VALUES ('lauraz','Headphone Sony',3);
+select*from keranjang;
