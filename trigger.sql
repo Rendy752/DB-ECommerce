@@ -11,34 +11,29 @@ set cekEmail=(select email from pengguna where email=new.Email);
 if (cekNoTelp is null and new.noTelp is not null) then
 	if(cekUsername is null) then
 		if(char_length(new.password)<8) then
-			signal sqlstate '44444'
-			set message_text = 'Password minimal 8 digit!!';
+			signal sqlstate '44444' set message_text = 'Password minimal 8 digit!!';
 		else
 			set new.id = uuid();
 			set new.password=password(new.password);
 			set new.level=1;
 		end if;
 	else
-		signal sqlstate '44444'
-		set message_text = 'Username telah diambil, silahkan ganti yang lain';
+		signal sqlstate '44444' set message_text = 'Username telah diambil, silahkan ganti yang lain';
 	end if;
 elseif(cekEmail is null and new.email is not null) then
 	if(cekUsername is null) then
 		if(char_length(new.password)<8) then
-			signal sqlstate '44444'
-			set message_text = 'Password minimal 8 digit!!';
+			signal sqlstate '44444' set message_text = 'Password minimal 8 digit!!';
 		else
 			set new.id = uuid();
 			set new.password=password(new.password);
 			set new.level=1;
 		end if;
 	else
-		signal sqlstate '44444'
-		set message_text = 'Username telah diambil, silahkan ganti yang lain';
+		signal sqlstate '44444' set message_text = 'Username telah diambil, silahkan ganti yang lain';
 	end if;
 else
-	signal sqlstate '44444'
-	set message_text = 'Nomor telepon atau email sudah terdaftar';
+	signal sqlstate '44444' set message_text = 'Nomor telepon atau email sudah terdaftar';
 end if;
 end <>
 delimiter ;
@@ -76,8 +71,7 @@ begin
 declare cekKategori int;
 set cekKategori=(select nama from kategori where nama=new.nama);
 if(cekKategori is not null) then
-	signal sqlstate '44444'
-	set message_text = 'Kategori sudah ada!!';
+	signal sqlstate '44444' set message_text = 'Kategori sudah ada!!';
 end if;
 set new.id = uuid();
 end <>
@@ -99,8 +93,7 @@ begin
 declare cekPelapak int;
 set cekPelapak=(select nama from pelapak where nama=new.nama and lokasi=new.lokasi);
 if(cekPelapak is not null) then
-	signal sqlstate '44444'
-	set message_text = 'Pelapak dengan lokasi yang sama sudah ada, tidak bisa menambah data';
+	signal sqlstate '44444' set message_text = 'Pelapak dengan lokasi yang sama sudah ada, tidak bisa menambah data';
 end if;
 set new.id = uuid();
 set new.rating=0;
@@ -132,22 +125,21 @@ INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES
 select*from pelapak;
 
 delimiter <>
-create trigger addDompetDigital
+create or replace trigger addDompetDigital
 before insert on dompetdigital for each row
 begin
 declare cekDompetDigital int;
 set cekDompetDigital=(select nama from dompetdigital where nama=new.nama);
 if(cekDompetDigital is not null) then
-	signal sqlstate '44444'
-	set message_text = 'Dompet digital sudah ada, tidak dapat menambah data';
+	signal sqlstate '44444' set message_text = 'Dompet digital sudah ada, tidak dapat menambah data';
 end if;
 set new.id = uuid();
 end <>
 delimiter ;
 
 INSERT INTO `shop`.`dompetDigital` (`nama`) VALUES ('OVO');
-INSERT INTO `shop`.`dompetDigital` (`nama`) VALUES ('OVO');
 INSERT INTO `shop`.`dompetDigital` (`nama`) VALUES ('BCA');
+INSERT INTO `shop`.`dompetDigital` (`nama`) VALUES ('OVO');
 INSERT INTO `shop`.`dompetDigital` (`nama`) VALUES ('GoPay');
 INSERT INTO `shop`.`dompetDigital` (`nama`) VALUES ('ShopeePay');
 INSERT INTO `shop`.`dompetDigital` (`nama`) VALUES ('DANA');
@@ -158,29 +150,28 @@ create or replace trigger addPromo
 before insert on promo for each row
 begin
 declare cekPromo int;
-set cekPromo=(select nama from promo where nama=new.nama and minTransaksi=new.minTransaksi);
+set cekPromo=(select nama from promo where nama=new.nama);
 if(cekPromo is not null) then
-	signal sqlstate '44444'
-	set message_text = 'Promo sudah ada, tidak dapat menambah data';
+	signal sqlstate '44444' set message_text = 'Promo sudah ada, tidak dapat menambah data';
 end if;
 set new.id = uuid();
 end <>
 delimiter ;
 
-INSERT INTO `shop`.`promo` (`nama`, `deskripsi`, `minTransaksi`, `levelPengguna`) VALUES 
-('Promo Lebaran', 'Diskon 20% untuk semua produk', 100000, 1);
-INSERT INTO `shop`.`promo` (`nama`, `deskripsi`, `minTransaksi`, `levelPengguna`) VALUES 
-('Promo Natal', 'Diskon 10% untuk semua produk', 200000, 2);
-INSERT INTO `shop`.`promo` (`nama`, `deskripsi`, `minTransaksi`, `levelPengguna`) VALUES 
-('Promo Lebaran', 'Diskon 30% untuk semua produk', 100000, 1);
-INSERT INTO `shop`.`promo` (`nama`, `deskripsi`, `minTransaksi`, `levelPengguna`) VALUES 
-('Promo Lebaran', 'Diskon 30% untuk semua produk', 150000, 1);
-INSERT INTO `shop`.`promo` (`nama`, `deskripsi`, `minTransaksi`, `levelPengguna`) VALUES 
-('Promo 6.6', 'Diskon 20% untuk semua produk', 400000, 3);
-INSERT INTO `shop`.`promo` (`nama`, `deskripsi`, `minTransaksi`, `levelPengguna`) VALUES 
-('Promo Potongan', 'Diskon 10% Potongan Untuk Produk Yang Dpilih', 0, 1);
-INSERT INTO `shop`.`promo` (`nama`, `deskripsi`, `minTransaksi`, `levelPengguna`) VALUES 
-('Promo Tahun Baru', 'Diskon 40% untuk semua produk', 200000, 3);
+INSERT INTO `shop`.`promo` (`nama`, `deskripsi`, `minTransaksi`, `diskon`,`levelPengguna`) VALUES 
+('Promo Lebaran', 'Diskon 20% untuk semua produk', 100000, 20, 1);
+INSERT INTO `shop`.`promo` (`nama`, `deskripsi`, `minTransaksi`, `diskon`, `levelPengguna`) VALUES 
+('Promo Natal', 'Diskon 10% untuk semua produk', 200000, 10, 2);
+INSERT INTO `shop`.`promo` (`nama`, `deskripsi`, `minTransaksi`, `diskon`, `levelPengguna`) VALUES 
+('Promo Lebaran', 'Diskon 30% untuk semua produk', 100000, 30, 1);
+INSERT INTO `shop`.`promo` (`nama`, `deskripsi`, `minTransaksi`, `diskon`, `levelPengguna`) VALUES 
+('Promo Lebaran 2', 'Diskon 30% untuk semua produk', 150000, 30, 1);
+INSERT INTO `shop`.`promo` (`nama`, `deskripsi`, `minTransaksi`, `diskon`, `levelPengguna`) VALUES 
+('Promo 6.6', 'Diskon 20% untuk semua produk', 400000, 20, 3);
+INSERT INTO `shop`.`promo` (`nama`, `deskripsi`, `minTransaksi`, `diskon`, `levelPengguna`) VALUES 
+('Promo Potongan', 'Diskon 10% Potongan Untuk Produk Yang Dpilih', 0, 10, 1);
+INSERT INTO `shop`.`promo` (`nama`, `deskripsi`, `minTransaksi`, `diskon`, `levelPengguna`) VALUES 
+('Promo Tahun Baru', 'Diskon 40% untuk semua produk', 200000, 40, 3);
 select*from promo;
 
 delimiter <>
@@ -192,11 +183,9 @@ declare cekAlamat int;
 set varIdPengguna=(select id from pengguna where username=new.idPengguna);
 set cekAlamat=(select count(*) from alamat where idPengguna=varIdPengguna and alamat=new.alamat);
 if(varIdPengguna is null) then
-	signal sqlstate '44444'
-	set message_text = 'Pengguna tidak diketahui, tidak dapat menambah data';
+	signal sqlstate '44444' set message_text = 'Pengguna tidak diketahui, tidak dapat menambah data';
 elseif(cekAlamat!=0) then
-	signal sqlstate '44444'
-	set message_text = 'Alamat sudah ada, tidak dapat menambah data';
+	signal sqlstate '44444' set message_text = 'Alamat sudah ada, tidak dapat menambah data';
 end if;
 set new.id = uuid();
 set new.idPengguna=varIdPengguna;
@@ -235,21 +224,17 @@ declare cekDompetPengguna int;
 set varIdPengguna=(select id from pengguna where username=new.idPengguna);
 set varIdDompetDigital=(select id from dompetDigital where nama=new.idDompet);
 set cekDompetPengguna=(select count(*) from dompetTerhubung where idPengguna=varIdPengguna and idDompet=varIdDompetDigital);
-if(varIdPengguna is null or varIdDompetDigital is null) then
-	signal sqlstate '44444'
-	set message_text = 'Pengguna atau dompet digital tidak diketahui, tidak dapat menambah data';
+if(varIdPengguna is null) then
+	signal sqlstate '44444' set message_text = 'Pengguna tidak diketahui, tidak dapat menambah data';
+elseif(varIdDompetDigital is null) then
+	signal sqlstate '44444' set message_text = 'Dompet digital tidak diketahui, tidak dapat menambah data';
 elseif(cekDompetPengguna!=0) then
-	signal sqlstate '44444'
-	set message_text = 'Pengguna sudah memiliki dompet terkait';
+	signal sqlstate '44444' set message_text = 'Pengguna sudah memiliki dompet terkait';
 end if;
 set new.idPengguna=varIdPengguna;
 set new.idDompet=varIdDompetDigital;
 end <>
 delimiter ;
-
-select*from pengguna;
-select*from dompetdigital;
-select*from dompetTerhubung;
 
 INSERT INTO `shop`.`dompetTerhubung` (`idPengguna`, `idDompet`) values ('susanto','ovo');
 INSERT INTO `shop`.`dompetTerhubung` (`idPengguna`, `idDompet`) values ('ilhamz','bri');
@@ -259,6 +244,7 @@ INSERT INTO `shop`.`dompetTerhubung` (`idPengguna`, `idDompet`) values ('lauraz'
 INSERT INTO `shop`.`dompetTerhubung` (`idPengguna`, `idDompet`) values ('budiz','bca');
 INSERT INTO `shop`.`dompetTerhubung` (`idPengguna`, `idDompet`) values ('budiz','gopay');
 INSERT INTO `shop`.`dompetTerhubung` (`idPengguna`, `idDompet`) values ('budiz','shopeepay');
+select*from dompetTerhubung;
 
 delimiter <>
 create or replace trigger addProduk
@@ -270,19 +256,19 @@ declare cekProduk int;
 set varIdKategori=(select id from kategori where nama=new.idKategori);
 set varIdPelapak=(select id from pelapak where nama=new.idPelapak);
 set cekProduk=(select count(*) from produk where nama=new.nama);
-if(varIdKategori is null or varIdPelapak is null) then
-	signal sqlstate '44444'
-	set message_text = 'Kategori atau pelapak tidak diketahui, tidak dapat menambah data';
+if(varIdKategori is null) then
+	signal sqlstate '44444' set message_text = 'Kategori tidak diketahui, tidak dapat menambah data';
+elseif(varIdPelapak is null) then
+	signal sqlstate '44444' set message_text = 'Pelapak tidak diketahui, tidak dapat menambah data';
 elseif(cekProduk!=0) then
-	signal sqlstate '44444'
-	set message_text = 'Produk sudah ada, tidak dapat menambah data';
+	signal sqlstate '44444' set message_text = 'Produk sudah ada, tidak dapat menambah data';
 else
-	if(new.kondisi not in("Baru","Lama","Bekas")) then
-		signal sqlstate '44444'
-		set message_text = 'Kondisi tidak diketahui, tidak dapat menambah data';
+	if((select locate(",",new.nama))!=0) then
+		signal sqlstate '44444' set message_text = 'Nama produk tidak boleh mengandung koma, tidak dapat menambah data';
+	elseif(new.kondisi not in("Baru","Lama","Bekas")) then
+		signal sqlstate '44444' set message_text = 'Kondisi tidak diketahui, tidak dapat menambah data';
 	elseif(new.asal not in("Lokal","Impor")) then
-		signal sqlstate '44444'
-		set message_text = 'Asal tidak diketahui, tidak dapat menambah data';
+		signal sqlstate '44444' set message_text = 'Asal tidak diketahui, tidak dapat menambah data';
 	else
 		set new.id=uuid();
 		set new.idPelapak=varIdPelapak;
@@ -300,6 +286,8 @@ INSERT INTO `shop`.`produk` (`idKategori`, `idPelapak`, `nama`, `stok`, `kondisi
 INSERT INTO `shop`.`produk` (`idKategori`, `idPelapak`, `nama`, `stok`, `kondisi`, `berat`, `asal`, `deskripsi`, `harga`) VALUES 
 ('elektronik','asus official','Laptop Asus ZenForce', 20,'Baru', 2000, 'Lokal', 'Laptop Asus Zenforce Ram 12GB', 7000000);
 INSERT INTO `shop`.`produk` (`idKategori`, `idPelapak`, `nama`, `stok`, `kondisi`, `berat`, `asal`, `deskripsi`, `harga`) VALUES 
+('fashion', 'zara', 'Kemeja Denim, ukuran M', 50, 'sangat baru', 100, 'lokal', 'Kemeja Denim Pria Ukuran M', 350000); -- tidak boleh koma
+INSERT INTO `shop`.`produk` (`idKategori`, `idPelapak`, `nama`, `stok`, `kondisi`, `berat`, `asal`, `deskripsi`, `harga`) VALUES 
 ('fashion', 'zara', 'Kemeja Denim', 50, 'sangat baru', 100, 'lokal', 'Kemeja Denim Pria Ukuran M', 350000); -- kondisi tidak diketahui
 INSERT INTO `shop`.`produk` (`idKategori`, `idPelapak`, `nama`, `stok`, `kondisi`, `berat`, `asal`, `deskripsi`, `harga`) VALUES 
 ('fashion', 'zara', 'Kemeja Denim', 50, 'baru', 100, 'ekspor', 'Kemeja Denim Pria Ukuran M', 350000); -- asal tidak diketahui
@@ -314,7 +302,7 @@ INSERT INTO `shop`.`produk` (`idKategori`, `idPelapak`, `nama`, `stok`, `kondisi
 INSERT INTO `shop`.`produk` (`idKategori`, `idPelapak`, `nama`, `stok`, `kondisi`, `berat`, `asal`, `deskripsi`, `harga`) VALUES 
 ('perfume', 'zara', 'Carolina Herera', 0, 'bekas', 350, 'impor', 'Jasmine scent, long lasting perfume with an unexpected twist of sensuality and mystery', 900000);
 select*from produk;
-select*from kategori;
+
 delimiter <>
 create or replace trigger addProdukFavorit
 before insert on produkFavorit for each row
@@ -326,14 +314,11 @@ set varIdPengguna=(select id from pengguna where username=new.idPengguna);
 set varIdProduk=(select id from produk where nama=new.idProduk);
 set cekProdukFavorit=(select count(*) from produkFavorit where idPengguna=varIdPengguna and idProduk=varIdProduk);
 if(varIdPengguna is null) then
-	signal sqlstate '44444'
-	set message_text = 'Pengguna tidak diketahui, tidak dapat menambah data';
+	signal sqlstate '44444' set message_text = 'Pengguna tidak diketahui, tidak dapat menambah data';
 elseif(varIdProduk is null) then
-	signal sqlstate '44444'
-	set message_text = 'Produk tidak diketahui, tidak dapat menambah data';
+	signal sqlstate '44444' set message_text = 'Produk tidak diketahui, tidak dapat menambah data';
 elseif(cekProdukFavorit!=0) then
-	signal sqlstate '44444'
-	set message_text = 'Produk sudah dalam list favorit, tidak dapat menambah data';
+	signal sqlstate '44444' set message_text = 'Produk sudah dalam list favorit, tidak dapat menambah data';
 else
 	set new.idPengguna=varIdPengguna;
     set new.idProduk=varIdProduk;
@@ -341,9 +326,6 @@ end if;
 end <>
 delimiter ;
 
-select*from pengguna;
-select*from produk;
-select*from produkfavorit;
 INSERT INTO `shop`.`produkFavorit` (`idPengguna`, `idProduk`) VALUES ('tono','Headphone Sony');
 INSERT INTO `shop`.`produkFavorit` (`idPengguna`, `idProduk`) VALUES ('ilhamz','Headphone Asus');
 INSERT INTO `shop`.`produkFavorit` (`idPengguna`, `idProduk`) VALUES ('ilhamz','Headphone Sony');
@@ -358,6 +340,7 @@ INSERT INTO `shop`.`produkFavorit` (`idPengguna`, `idProduk`) VALUES ('liliaz','
 INSERT INTO `shop`.`produkFavorit` (`idPengguna`, `idProduk`) VALUES ('ilhamz','Laptop Asus ZenForce');
 INSERT INTO `shop`.`produkFavorit` (`idPengguna`, `idProduk`) VALUES ('lauraz','Headphone Sony');
 INSERT INTO `shop`.`produkFavorit` (`idPengguna`, `idProduk`) VALUES ('ilhamz','Carolina Herera');
+select*from produkFavorit;
 
 delimiter <>
 create or replace trigger addKeranjang
@@ -372,20 +355,15 @@ set varIdProduk=(select id from produk where nama=new.idProduk);
 set cekKeranjang=(select count(*) from keranjang where idPengguna=varIdPengguna and idProduk=varIdProduk);
 set cekStok=(select stok from produk where id=varIdProduk);
 if(varIdPengguna is null) then
-	signal sqlstate '44444'
-	set message_text = 'Pengguna tidak diketahui, tidak dapat menambah data';
+	signal sqlstate '44444' set message_text = 'Pengguna tidak diketahui, tidak dapat menambah data';
 elseif(varIdProduk is null) then
-	signal sqlstate '44444'
-	set message_text = 'Produk tidak diketahui, tidak dapat menambah data';
+	signal sqlstate '44444' set message_text = 'Produk tidak diketahui, tidak dapat menambah data';
 elseif(cekKeranjang!=0) then
-	signal sqlstate '44444'
-	set message_text = 'Produk sudah dalam list keranjang, tidak dapat menambah data';
+	signal sqlstate '44444' set message_text = 'Produk sudah dalam list keranjang, tidak dapat menambah data';
 elseif(cekStok=0) then
-	signal sqlstate '44444'
-	set message_text = 'Stok kosong, tidak dapat menambah data';
+	signal sqlstate '44444' set message_text = 'Stok kosong, tidak dapat menambah data';
 elseif(new.jumlah>cekStok) then
-	signal sqlstate '44444'
-	set message_text = 'Stok tidak tersedia, tidak dapat menambah data';
+	signal sqlstate '44444' set message_text = 'Stok tidak tersedia, tidak dapat menambah data';
 else
 	set new.idPengguna=varIdPengguna;
     set new.idProduk=varIdProduk;

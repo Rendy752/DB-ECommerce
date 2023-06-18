@@ -12,7 +12,7 @@ drop table if exists detailpesanan;
 drop table if exists pesanan;
 drop table if exists dompetterhubung;
 drop table if exists promo;
-drop table if exists barangfavorit;
+drop table if exists produkfavorit;
 drop table if exists produk;
 drop table if exists kategori;
 drop table if exists alamat;
@@ -51,6 +51,7 @@ CREATE TABLE IF NOT EXISTS `shop`.`promo` (
   `nama` VARCHAR(255) NOT NULL,
   `deskripsi` VARCHAR(255) NOT NULL,
   `minTransaksi` DECIMAL(10,2) NOT NULL,
+  `diskon` INT NOT NULL,
   `levelPengguna` INT NOT NULL,
   `createdAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updatedAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -193,8 +194,7 @@ DEFAULT CHARACTER SET = utf8;
 CREATE TABLE IF NOT EXISTS `shop`.`pesanan` (
   `id` CHAR(36) NOT NULL,
   `idPengguna` CHAR(36) NOT NULL,
-  `idPelapak` CHAR(36) NOT NULL,
-  `idPromo` CHAR(36) NOT NULL,
+  `idPromo` CHAR(36),
   `idAlamat` CHAR(36) NOT NULL,
   `idDompet` CHAR(36) NOT NULL,
   `tanggal` DATE NOT NULL,
@@ -206,9 +206,6 @@ CREATE TABLE IF NOT EXISTS `shop`.`pesanan` (
   CONSTRAINT `fk_idPenggunaPesanan`
     FOREIGN KEY (`idPengguna`)
     REFERENCES `shop`.`pengguna` (`id`),
-  CONSTRAINT `fk_idPelapakPesanan`
-    FOREIGN KEY (`idPelapak`)
-    REFERENCES `shop`.`pelapak` (`id`),
   CONSTRAINT `fk_idPromoPesanan`
     FOREIGN KEY (`idPromo`)
     REFERENCES `shop`.`promo` (`id`),
@@ -225,6 +222,7 @@ DEFAULT CHARACTER SET = utf8;
 CREATE TABLE IF NOT EXISTS `shop`.`detailPesanan` (
   `idPesanan` CHAR(36) NOT NULL,
   `idProduk` CHAR(36) NOT NULL,
+  `jumlah` INT NOT NULL,
   `createdAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updatedAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT `fk_idPesananDetailPesanan`
@@ -239,3 +237,5 @@ DEFAULT CHARACTER SET = utf8;
 
 end <>
 delimiter ;
+
+call reset();
