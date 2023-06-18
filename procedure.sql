@@ -216,22 +216,3 @@ call pesan('ilhamz','Promo Lebaran','Jl. Rambutan No. 123','OVO','2023-06-07','K
 call pesan('budiz','Promo Lebaranz','Jl. Mangga No. 456','BCA','2023-06-08','Laptop Asus ZenForce',1,'');
 call pesan('budiz','Promo Lebaran','Jl. Mangga No. 456','GoPay','2023-06-08','Sepatu Nike Running,Kemeja Denim','1, 2','');
 call pesan('budiz','Promo Lebaran','Jl. Mangga No. 456','GoPay','2023-06-09','Headphone Sony,Kemeja Denim,Laptop Asus ZenForce,Carolina Herera,Sepatu Nike Running,Baju Renang','2,4,1,3,30,2','');
-
-select coalesce((select id from promo join promoTerhubung where promo.id=promoTerhubung.idPromo and idPengguna='92332b2a-0ad4-11ee-80fd-00155d02be68' and promo.nama='Promo Lebaranz'),'-');
-select*from detailpesanan;
-select locate(',','Kemeja Demis,Headphone Sony,',1);
-select replace('Kemeja Demis,Headphone Sony, a',',',' ',1);
-select substring('Kemeja Demis,Headphone Sony',1,(select locate(',','Kemeja Demis,Headphone Sony',1)-0-1)); -- tidak termasuk koma
-select locate(',','Kemeja Demis,Headphone Sony',14);
-select substring('Kemeja Demis,Headphone Sony',14); -- if !=0
-select substring('Kemeja Demis,Headphone Sony,',14,(select locate(',','Kemeja Demis,Headphone Sony,',14)-13-1));
-select SUBSTRING_INDEX('Kemeja Demis', ',', 1);
-select SUBSTRING_INDEX('Kemeja Demis,Headphone Sony,', ',', 1);
-select substring_index(substring_index('Kemeja Demis,Headphone Sony,a', ',', 1), ',', -1);
-
-select locate(',','4,33',1);
-select substring('4,33',1,(select locate(',','4,33',1)-0-1)); -- tidak termasuk koma
-select locate(',','4,33',3);
-select substring('Kemeja Demis,Headphone Sony',14); -- if !=0
-select substring('Kemeja Demis,Headphone Sony,',14,(select locate(',','Kemeja Demis,Headphone Sony,',14)-13-1));
-
