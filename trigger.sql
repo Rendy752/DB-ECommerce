@@ -37,7 +37,7 @@ else
 end if;
 end <>
 delimiter ;
-select*from pengguna;
+
 INSERT INTO `shop`.`pengguna` (`namaLengkap`, `username`, `noTelp`, `email`, `password`, `pin`) VALUES 
 ('Ilham', 'ilhamz','08129022310', 'ilham@gmail.com', 'ilham7580', '7580');
 

@@ -142,6 +142,9 @@ declare varJumlah varchar(255);
 declare cekStok int;
 declare varHarga decimal(10,2);
 declare varMinTransaksi decimal(10,2);
+declare varUUID char(36);
+declare cekUUID int default 0;
+set varUUID=uuid();
 set varIdPengguna=(select id from pengguna where username=varUsername);
 set varIdPromo=(select id from promo join promoTerhubung where promo.id=promoTerhubung.idPromo and idPengguna=varIdPengguna and promo.nama=varPromo);
 set varIdAlamat=(select id from alamat where idPengguna=varIdPengguna and alamat=varAlamat);
@@ -167,10 +170,13 @@ while(cekKoma!=0) do
         set varJumlah=(select substring_index(substring_index(listJumlah, ',', i), ',', -1));
 		set cekStok=(select stok from produk where id=varIdProduk);
         if(varJumlah<=cekStok) then
-			insert into pesanan(id,idPengguna,idAlamat,idDompet,tanggal,catatan,status) values
-			(uuid(),varIdPengguna,varIdAlamat,varIdDompet,varTanggal,varCatatan,'Sedang diproses');
+			set cekUUID=1;
+            if((select id from pesanan where id=varUUID) is null) then
+				insert into pesanan(id,idPengguna,idAlamat,idDompet,tanggal,catatan,status) values
+				(varUUID,varIdPengguna,varIdAlamat,varIdDompet,varTanggal,varCatatan,'Sedang diproses');
+			end if;
 			insert into detailPesanan(idPesanan,idProduk,jumlah) values
-			((select id from pesanan order by id desc limit 1),varIdProduk,varJumlah);
+			(varUUID,varIdProduk,varJumlah);
 			update produk set stok=stok-varJumlah,terjual=terjual+varJumlah where id=varIdProduk;
 		else
 			insert into Pemberitahuan values (concat('Stok ',varProduk,' tidak mencukupi'));
@@ -179,16 +185,19 @@ while(cekKoma!=0) do
 		insert into Pemberitahuan values (concat(varProduk,' tidak diketahui'));
 	end if;
     set i=i+1;
+    select i;
 end while;
 set varHarga=(select produk.harga*detailPesanan.jumlah from pesanan left join detailPesanan on pesanan.id=detailPesanan.idPesanan
 join produk on detailPesanan.idProduk=produk.id where pesanan.id=(select id from pesanan order by id desc limit 1) group by pesanan.id);
 set varMinTransaksi=(select minTransaksi from promo where id=varIdPromo);
-if(varIdPromo is not null) then
-	if(varHarga>=varMinTransaksi) then
-		update pesanan set idPromo=varIdPromo where id=(select id from pesanan order by id desc limit 1);
-        delete from promoTerhubung where idPengguna=varIdPengguna and idPromo=varIdPromo;
-	else
-		insert into Pemberitahuan values (concat('Total harga pesanan = ', varHarga, '> kriteria min transaksi ', varPromo, '= ',varMinTransaksi));
+if(cekUUID=1) then -- jika terdapat pesanan barang yang valid
+	if(varIdPromo is not null) then
+		if(varHarga>=varMinTransaksi) then
+			update pesanan set idPromo=varIdPromo where id=(select id from pesanan order by id desc limit 1);
+			delete from promoTerhubung where idPengguna=varIdPengguna and idPromo=varIdPromo;
+		else
+			insert into Pemberitahuan values (concat('Total harga pesanan = ', varHarga, '> kriteria min transaksi ', varPromo, '= ',varMinTransaksi));
+		end if;
 	end if;
 end if;
 select*from Pemberitahuan;
@@ -197,7 +206,6 @@ end <>
 delimiter ;
 select*from promo;
 
-select concat("Username pengguna = ","halo");
 call pesan('hafiz','','Jl. Siput No. 123','OVO','2023-06-07','Headphone Sony',1,'');
 call pesan('ilhamz','','Jl. Siput No. 123','OVO','2023-06-07','Headphone Sony',1,'');
 call pesan('ilhamz','','Jl. Rambutan No. 123','GoPay','2023-06-07','Headphone Sony',1,'');
@@ -210,7 +218,7 @@ call pesan('budiz','Promo Lebaran','Jl. Mangga No. 456','GoPay','2023-06-08','Se
 call pesan('budiz','Promo Lebaran','Jl. Mangga No. 456','GoPay','2023-06-09','Headphone Sony,Kemeja Denim,Laptop Asus ZenForce,Carolina Herera,Sepatu Nike Running,Baju Renang','2,4,1,3,30,2','');
 
 select coalesce((select id from promo join promoTerhubung where promo.id=promoTerhubung.idPromo and idPengguna='92332b2a-0ad4-11ee-80fd-00155d02be68' and promo.nama='Promo Lebaranz'),'-');
-select*from pengguna;
+select*from detailpesanan;
 select locate(',','Kemeja Demis,Headphone Sony,',1);
 select replace('Kemeja Demis,Headphone Sony, a',',',' ',1);
 select substring('Kemeja Demis,Headphone Sony',1,(select locate(',','Kemeja Demis,Headphone Sony',1)-0-1)); -- tidak termasuk koma
