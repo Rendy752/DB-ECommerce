@@ -1,0 +1,401 @@
+/*Create collection*/
+db.createCollection("pengguna");
+db.createCollection("kategori");
+db.createCollection("promo");
+db.createCollection("dompetDigital");
+db.createCollection("alamat");
+db.createCollection("dompetTerhubung");
+db.createCollection("promoTerhubung");
+db.createCollection("pelapak");
+db.createCollection("produk");
+db.createCollection("barangFavorit");
+db.createCollection("keranjang");
+db.createCollection("pesanan");
+db.createCollection("detailPesanan");
+
+/*Insert Collection pengguna*/
+	db.pengguna.insertMany([{
+	namaLengkap : "Ilham",
+	noTelp : "08129022310",
+	email : "ilham@gmail.com",
+	password : "123",
+	pin : "7890",
+	level : 1 },
+	{
+	namaLengkap : "Cita",
+	noTelp : "087638172311",
+	email : "cita12@gmail.com",
+	password : "123",
+	pin : "7890",
+	level : 2 },
+	{
+	namaLengkap : "Laura",
+	noTelp : "085367818912",
+	email : "Laura22@gmail.com",
+	password : "123",
+	pin : "7890",
+	level : 3 },
+	{
+	namaLengkap : "Windah",
+	noTelp : "085378908716",
+	email : "Windahgeming@gmail.com",
+	password : "123",
+	pin : "7890",
+	level : 4 },
+	{
+	namaLengkap : "Basudara",
+	noTelp : "085379809112",
+	email : "basudarageming@gmail.com",
+	password : "123",
+	pin : "7890",
+	level : 2 }
+
+])
+
+/*Insert Collection kategori*/
+	db.kategori.insertMany([{
+	nama : "Elektronik"},
+	{
+	nama : "Fashion"},
+	{
+	nama : "Perfume"},
+	{
+	nama : "Accesories"},
+	{
+	nama : "Alat Dapur"}
+])
+
+/*Insert Collection Promo*/
+	db.promo.insertMany([{
+	nama : "Promo Lebaran",
+	deskripsi : "Diskon 20% Untuk semua Produk",
+	minTransaksi : 100000,
+	levelPengguna : 1},
+	{
+	nama : "Promo Natal",
+	deskripsi : "Diskon 10% Untuk semua Produk",
+	minTransaksi : 200000,
+	levelPengguna : 2},
+	{
+	nama : "Promo 6.6",
+	deskripsi : "Diskon 20% Untuk Semua Produk",
+	minTransaksi : 400000,
+	levelPengguna : 3},
+	{
+	nama : "Promo Potongan",
+	deskripsi : "Diskon 10% Untuk Produk Yang Dipilih",
+	minTransaksi : 0,
+	levelPengguna : 1},
+	{
+	nama : "Promo Tahun Baru",
+	deskripsi : "Diskon 40% Untuk semua Produk",
+	minTransaksi : 200000,
+	levelPengguna : 3},
+	
+])
+
+/*Insert Collection dompetDigital*/
+	db.dompetDigital.insertMany([{
+	nama : "Ovo"},
+	{
+	nama : "BCA"},
+	{
+	nama : "GoPay"},
+	{
+	nama : "ShopeePay"},
+	{
+	nama : "DANA"}
+])
+
+/*Insert Collection alamat(R)*/
+const dataAlamat = [{objPengguna : db.pengguna.findOne({namaLengkap : "Ilham"}),
+					alamatLengkap : "Jl.Rambutan No.123",
+					alamatSebagai : "Rumah",
+					namaPenerima : "Ilham",
+					noTelp : "08129022310",
+					kecatamatan : "Kec.Rambutan",
+					kota : "Kota Palembang",
+					provinsi :"Provinsi Sumatera Selatan",
+					kodePos : "32511"},
+					
+					{objPengguna : db.pengguna.findOne({namaLengkap : "Cita"}),
+					alamatLengkap : "Jl.Mangga No.456",
+					alamatSebagai : "Kantor",
+					namaPenerima : "Cita",
+					noTelp : "087638172311",
+					kecatamatan : "Kec. Mangga",
+					kota : "Kota Palembang",
+					provinsi :"Provinsi Sumatera Selatan",
+					kodePos : "32512"},
+					
+					{objPengguna : db.pengguna.findOne({namaLengkap : "Laura"}),
+					alamatLengkap : "Jl. Apel No. 789",
+					alamatSebagai : "Rumah",
+					namaPenerima : "Laura",
+					noTelp : "085367818912",
+					kecatamatan : "Kec.Rambutan",
+					kota : "Kota Palembang",
+					provinsi :"Provinsi Sumatera Selatan",
+					kodePos : "32513"},
+					
+					{objPengguna : db.pengguna.findOne({namaLengkap : "Windah"}),
+					alamatLengkap : "Jl. Jeruk No. 101",
+					alamatSebagai : "Rumah",
+					namaPenerima : "Windah",
+					noTelp : "085378908716",
+					kecatamatan : "Kec. Jeruk",
+					kota : "Kota Palembang",
+					provinsi :"Provinsi Sumatera Selatan",
+					kodePos : "32514"},
+					
+					{objPengguna : db.pengguna.findOne({namaLengkap : "Basudara"}),
+					alamatLengkap : "Jl. Manggis No. 202",
+					alamatSebagai : "Rumah",
+					namaPenerima : "Basudara",
+					noTelp : "085379809112",
+					kecatamatan : "Kec. Manggis',",
+					kota : "Kota Palembang",
+					provinsi :"Provinsi Sumatera Selatan",
+					kodePos : "32515"}
+					]
+					
+db.alamat.insertMany(dataAlamat)
+
+/*Insert Collection dompetTerhubung(R)*/
+const dataDompetTerhubung = [{nama : "Ilham",
+				idPengguna : db.pengguna.findOne({namaLengkap : "Ilham"}),
+				idDompet : db.dompetDigital.findOne({nama : "Ovo"}._id)},
+		
+				{nama : "Cita",
+				objPengguna : db.pengguna.findOne({namaLengkap : "Cita"}),
+				objDompet : db.dompetDigital.findOne({nama : "GoPay"})},
+				
+				{nama : "Laura",
+				objPengguna : db.pengguna.findOne({namaLengkap : "Laura"}),
+				objDompet : db.dompetDigital.findOne({nama : "BCA"})},
+				
+				{nama : "Windah",
+				objPengguna : db.pengguna.findOne({namaLengkap : "Windah"}),
+				objDompet : db.dompetDigital.findOne({nama : "Ovo"})},
+				
+				{nama : "Basudara",
+				objPengguna : db.pengguna.findOne({namaLengkap : "Basudara"}),
+				objDompet : db.dompetDigital.findOne({nama : "Ovo"})},
+				]
+db.dompetTerhubung.insertMany(dataDompetTerhubung)
+
+/* Insert Collection Promo Terhubung(R)*/
+const dataPromoTerhubung = [{	namaPengguna : "Ilham",
+				objPengguna : db.pengguna.findOne({namaLengkap : "Ilham"}),
+				objPromo : db.promo.findOne({nama : "Promo Lebaran"})},
+				
+				{namaPengguna : "Cita",
+				objPengguna : db.pengguna.findOne({namaLengkap : "Cita"}),
+				objPromo : db.promo.findOne({nama : "Promo 6.6"})},
+				
+				{namaPengguna : "Laura",
+				objPengguna : db.pengguna.findOne({namaLengkap : "Laura"}),
+				objPromo : db.promo.findOne({nama : "Promo Natal"})},
+				
+				{namaPengguna : "Windah",
+				objPengguna : db.pengguna.findOne({namaLengkap : "Windah"}),
+				objPromo : db.promo.findOne({nama : "Promo Potongan"})},
+				
+				{namaPengguna : "Basudara",
+				objPengguna : db.pengguna.findOne({namaLengkap : "Basudara"}),
+				objPromo : db.promo.findOne({nama : "Promo Tahun Baru"})},
+				]
+db.promoTerhubung.insertMany(dataPromoTerhubung)
+
+/*Insert Collection Pelapak*/
+	db.pelapak.insertMany([{
+	pelapak : "Asus Official",
+	lokasi : "Jakarta",
+	feedbackPositif : "positif",
+	waktuProsesTercepat : 2,
+	waktuProsesTerlama : 5},
+	{
+	pelapak : "Zara",
+	lokasi : "Bandung",
+	feedbackPositif : "positif",
+	waktuProsesTercepat : 1,
+	waktuProsesTerlama : 3},
+	{
+	pelapak : "Xyz Shop",
+	lokasi : "Bandung",
+	feedbackPositif : "negatif",
+	waktuProsesTercepat : 20,
+	waktuProsesTerlama : 24},
+	{
+	pelapak : "H&M",
+	lokasi : "Jakarta",
+	feedbackPositif : "positif",
+	waktuProsesTercepat : 1,
+	waktuProsesTerlama : 3},
+	
+	{
+	pelapak : "Sonny Official",
+	lokasi : "Jakarta",
+	feedbackPositif : "positif",
+	waktuProsesTercepat : 2,
+	waktuProsesTerlama : 4},
+	{
+	pelapak : "Samsung Official",
+	lokasi : "Jakarta",
+	feedbackPositif : "negatif",
+	waktuProsesTercepat : 1,
+	waktuProsesTerlama : 3},
+	{
+	pelapak : "Nike",
+	lokasi : "Jakarta",
+	feedbackPositif : "negatif",
+	waktuProsesTercepat : 1,
+	waktuProsesTerlama : 6}
+	])
+
+/*Insert Collection Produk*/
+db.produk.insertMany([
+  {
+    objKategori: db.kategori.findOne({ nama: "Elektronik" }),
+    objPelapak: db.pelapak.findOne({ pelapak: "Asus Official" }),
+    nama: "Laptop Asus ZenForce",
+    rating: 4.5,
+    ulasan: 10,
+    stok: 20,
+    terjual: 5,
+    kondisi: "baru",
+    berat: 2,
+    asal: "lokal",
+    deskripsi: "Laptop Asus Zenforce Ram 12GB",
+    harga: 5000000
+  },
+  {
+    objKategori: db.kategori.findOne({ nama: "Fashion" }),
+    objPelapak: db.pelapak.findOne({ pelapak: "Zara" }),
+    nama: "Kemeja Denim",
+    rating: 4.2,
+    ulasan: 8,
+    stok: 50,
+    terjual: 15,
+    kondisi: "baru",
+    berat: 0.5,
+    asal: "lokal",
+    deskripsi: "Kemeja Denim Pria Ukuran M",
+    harga: 350000
+  },
+  {
+    objKategori: db.kategori.findOne({ nama: "Fashion" }),
+    objPelapak: db.pelapak.findOne({ pelapak: "H&M" }),
+    nama: "Celana Jeans Slim Fit",
+    rating: 4.0,
+    ulasan: 6,
+    stok: 40,
+    terjual: 12,
+    kondisi: "baru",
+    berat: 0.7,
+    asal: "lokal",
+    deskripsi: "Celana Jeans Slim Fit Warna Biru",
+    harga: 250000
+  },
+  {
+    objKategori: db.kategori.findOne({ nama: "Fashion" }),
+    objPelapak: db.pelapak.findOne({ pelapak: "Nike" }),
+    nama: "Sepatu Nike Running",
+    rating: 4.5,
+    ulasan: 18,
+    stok: 45,
+    terjual: 10,
+    kondisi: "baru",
+    berat: 0.6,
+    asal: "impor",
+    deskripsi: "Sepatu Nike Running Pria",
+    harga: 800000
+  },
+  {
+    objKategori: db.kategori.findOne({ nama: "Elektronik" }),
+    objPelapak: db.pelapak.findOne({pelapak: "Sonny Official"}),
+    nama: "Headphone Sony",
+    rating: 4.6,
+    ulasan: 12,
+    stok: 25,
+    terjual: 8,
+    kondisi: "baru",
+    berat: 0.4,
+    asal: "impor",
+    deskripsi: "Headphone Sony Noise-Canceling",
+    harga: 1200000}])
+
+/*Insert Collection barang Favorit*/
+db.barangFavorit.insertMany([
+  {
+	nama : "Ilham",
+    objPengguna: db.pengguna.findOne({ namaLengkap: "Ilham" }),
+    objProduk: db.produk.findOne({ nama: "Headphone Sony" }),
+  },])
+  
+/*Insert Collection keranjang*/
+const dataKeranjang = [
+	{
+	nama : "Ilham",
+    objPengguna: db.pengguna.findOne({ namaLengkap: "Ilham" }),
+	objProduk: db.produk.findOne({ nama: "Laptop Asus ZenForce" }),
+	jumlahProduk : 1,
+	},	
+	{
+	nama : "Cita",
+    objPengguna: db.pengguna.findOne({ namaLengkap: "Cita" }),
+	objProduk: db.produk.findOne({ nama: "Kemeja Denim" }),
+	jumlahProduk : 3,
+	},
+	{
+	nama : "Laura",
+    objPengguna: db.pengguna.findOne({ namaLengkap: "Laura" }),
+	objProduk: db.produk.findOne({ nama: "Celana Jeans Slim Fit" }),
+	jumlahProduk : 2,
+	},
+	{
+	nama : "Windah",
+    objPengguna: db.pengguna.findOne({ namaLengkap: "Windah" }),
+	objProduk: db.produk.findOne({ nama: "Sepatu Nike Running" }),
+	jumlahProduk : 4,
+	},
+	{
+	nama : "Ilham",
+    objPengguna: db.pengguna.findOne({ namaLengkap: "Basudara" }),
+	objProduk: db.produk.findOne({ nama: "Headphone Sony" }),
+	jumlahProduk : 1,
+	}]
+db.keranjang.insertMany(dataKeranjang)
+
+  
+/*Insert Collection pesanan */
+const dataPesanan = [{
+	objPengguna : db.pengguna.findOne({ namaLengkap: "Ilham" }),
+	objPelapak : db.pelapak.findOne({ pelapak: "Asus Official" }),
+	objPromo : db.promo.findOne({ nama: "Promo Lebaran" }),
+	objAlamat : db.alamat.findOne({ kodePos: "32511" }),
+	objDompetDigital : db.dompetDigital.findOne({ nama: "Ovo" })},
+
+	{
+	objPengguna : db.pengguna.findOne({ namaLengkap: "Cita"}),
+	objPelapak : db.pelapak.findOne({ pelapak: "Zara" }),
+	objPromo : db.promo.findOne({ nama: "Promo 6.6" }),
+	objAlamat : db.alamat.findOne({ kodePos: "32511" }),
+	objDompetDigital : db.dompetDigital.findOne({ nama: "Ovo" }),
+	}]
+
+db.pesanan.insertMany(dataPesanan)
+
+/* Inser detail pesanan*/
+const dataDetailPesanan = [
+	{
+	nama : "Cita",
+	objPengguna : db.pengguna.findOne({namaLengkap : "Cita"}),
+	objProduk : db.produk.findOne({nama : "Laptop Asus ZenForce"})
+	},
+	{	nama : "Ilham",
+	objPengguna : db.pengguna.findOne({namaLengkap : "Ilham"}),
+	objProduk : db.produk.findOne({nama : "Kemeja Denim"})
+	},]
+
+db.pesanan.insertMany(dataDetailPesanan);
