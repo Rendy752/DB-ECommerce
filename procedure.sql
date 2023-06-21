@@ -271,3 +271,37 @@ call pesan('budiz','Promo Lebaran','Jl. Mangga No. 456','GoPay','2023-06-08','Se
 call pesan('budiz','Promo Lebaran','Jl. Mangga No. 456','GoPay','2023-06-09',
 'Headphone Sony,Kemeja Denim,Laptop Asus ZenForce,Carolina Herera,Sepatu Nike Running,Baju Renang',
 '2,4,1,3,30,2','SiCepat HALU,J&T REG,BukaExpress REG,J&T REG','Potongan harga,Potongan harga,Promo Lebaran,Potongan harga','');
+
+delimiter <>
+create or replace procedure lihatNotaPesanan(varIdPesananPelapak char(36))
+begin
+declare cekPesananPelapak char(36);
+set cekPesananPelapak=(select id from pesananPelapak where id=varIdPesananPelapak);
+if(cekPesananPelapak is null) then
+	signal sqlstate '44444' set message_text = 'Pesanan pelapak tidak diketahui';
+else
+select pesananPelapak.id as `No. Pesanan`,round(coalesce(sum(detailPesanan.jumlah*produk.harga)+sum(kurir.ongkir)-
+coalesce(sum((detailPesanan.jumlah*produk.harga))*(promoPelapak.diskon/100),0),sum(detailPesanan.jumlah*produk.harga)+
+sum(kurir.ongkir)),2) as `Total Pembayaran`, pesanan.tanggal as `Tanggal Pemesanan`,alamat.namaPenerima as `Nama Penerima`,
+pelapak.nama as `Pelapak`,sum(detailPesanan.jumlah*produk.harga) as `Subtotal Belanja`,sum(kurir.ongkir) as `Ongkir`,
+sum(detailPesanan.jumlah*produk.harga)+sum(kurir.ongkir) as `Subtotal`,concat('Rp',round(substring_index(coalesce
+(sum((detailPesanan.jumlah*produk.harga))*(promoPelapak.diskon/100),0),'.',2),2)) as `Potongan Harga Barang`,
+round(coalesce(sum(detailPesanan.jumlah*produk.harga)+sum(kurir.ongkir)-coalesce(sum((detailPesanan.jumlah*produk.harga))*
+(promoPelapak.diskon/100),0),sum(detailPesanan.jumlah*produk.harga)+sum(kurir.ongkir)),2) as `Total Belanja`,
+concat(alamat,', ',kecamatan,', ',kota,'. ',provinsi,', ',kodePos,'.') as `Alamat`, metodePembayaran.nama as `Metode Pembayaran`
+from promoPelapak right join pesananPelapak on promoPelapak.id=pesananPelapak.idPromoPelapak 
+join pesanan on pesananPelapak.idPesanan=pesanan.id join detailPesanan on detailPesanan.idPesananPelapak=pesananPelapak.id 
+join pelapak on pesananPelapak.idPelapak=pelapak.id join produk on detailPesanan.idProduk=produk.id join pengguna 
+on pesanan.idPengguna=pengguna.id join kurir on kurir.id=pesananPelapak.idKurir join alamat on pesanan.idAlamat=alamat.id 
+join metodePembayaran on metodePembayaran.id=pesanan.idMetodePembayaran where pesananPelapak.id=varIdPesananPelapak;
+end if;
+end <>
+delimiter ;
+
+select*from pesananPelapak;
+call lihatNotaPesanan('ea824d73-1042-11ee-b1a1-6802ce07b577');
+call lihatNotaPesanan('ef89a9d0-103c-11ee-b1a1-6802ce07b577');
+call lihatNotaPesanan('9ce65cd8-103a-11ee-b1a1-6802ce07b577');
+call lihatNotaPesanan('41ed9c7c-103b-11ee-b1a1-6802ce07b577');
+call lihatNotaPesanan('797eefa8-1042-11ee-b1a1-6802ce07b577');
+call lihatNotaPesanan('b9ee6e6e-103b-11ee-b1a1-6802ce07b577');
