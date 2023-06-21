@@ -7,10 +7,13 @@ create or replace procedure reset()
 begin
 
 drop table if exists promoterhubung;
-drop table if exists keranjang;
 drop table if exists detailpesanan;
+drop table if exists pesananpelapak;
+drop table if exists promopelapak;
+drop table if exists keranjang;
+drop table if exists kurir;
 drop table if exists pesanan;
-drop table if exists dompetterhubung;
+drop table if exists metodepembayaranterhubung;
 drop table if exists promo;
 drop table if exists produkfavorit;
 drop table if exists produk;
@@ -18,7 +21,7 @@ drop table if exists kategori;
 drop table if exists alamat;
 drop table if exists pelapak;
 drop table if exists pengguna;
-drop table if exists dompetdigital;
+drop table if exists metodePembayaran;
 
 CREATE TABLE IF NOT EXISTS `shop`.`pengguna` (
   `id` CHAR(36) NOT NULL,
@@ -52,6 +55,7 @@ CREATE TABLE IF NOT EXISTS `shop`.`promo` (
   `deskripsi` VARCHAR(255) NOT NULL,
   `minTransaksi` DECIMAL(10,2) NOT NULL,
   `diskon` INT NOT NULL,
+  `berlakuHingga` DATE NOT NULL,
   `levelPengguna` INT NOT NULL,
   `createdAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updatedAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -60,7 +64,7 @@ CREATE TABLE IF NOT EXISTS `shop`.`promo` (
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
 
-CREATE TABLE IF NOT EXISTS `shop`.`dompetDigital` (
+CREATE TABLE IF NOT EXISTS `shop`.`metodePembayaran` (
   `id` CHAR(36) NOT NULL,
   `nama` VARCHAR(255) NOT NULL,
   `createdAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -91,17 +95,17 @@ CREATE TABLE IF NOT EXISTS `shop`.`alamat` (
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
 
-CREATE TABLE IF NOT EXISTS `shop`.`dompetTerhubung` (
+CREATE TABLE IF NOT EXISTS `shop`.`metodePembayaranTerhubung` (
   `idPengguna` CHAR(36) NOT NULL,
-  `idDompet` CHAR(36) NOT NULL,
+  `idMetodePembayaran` CHAR(36) NOT NULL,
   `createdAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updatedAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  CONSTRAINT `fk_idPenggunaDompet`
+  CONSTRAINT `fk_idPenggunaMetodePembayaran`
     FOREIGN KEY (`idPengguna`)
     REFERENCES `shop`.`pengguna` (`id`),
-  CONSTRAINT `fk_idDompetTerhubung`
-    FOREIGN KEY (`idDompet`)
-    REFERENCES `shop`.`dompetDigital` (`id`)
+  CONSTRAINT `fk_idMetodePembayaranTerhubung`
+    FOREIGN KEY (`idMetodePembayaran`)
+    REFERENCES `shop`.`metodePembayaran` (`id`)
 )
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
@@ -129,6 +133,24 @@ CREATE TABLE IF NOT EXISTS `shop`.`pelapak` (
   `createdAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updatedAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
+)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+CREATE TABLE IF NOT EXISTS `shop`.`promoPelapak` (
+  `id` CHAR(36) NOT NULL,
+  `idPelapak` CHAR(36) NOT NULL,
+  `nama` VARCHAR(255) NOT NULL,
+  `deskripsi` VARCHAR(255) NOT NULL,
+  `minTransaksi` DECIMAL(10,2) NOT NULL,
+  `diskon` INT NOT NULL,
+  `berlakuHingga` DATE NOT NULL,
+  `createdAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updatedAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY(`id`),
+  CONSTRAINT `fk_idPelapakPromoPelapak`
+    FOREIGN KEY (`idPelapak`)
+    REFERENCES `shop`.`pelapak` (`id`)
 )
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
@@ -196,10 +218,8 @@ CREATE TABLE IF NOT EXISTS `shop`.`pesanan` (
   `idPengguna` CHAR(36) NOT NULL,
   `idPromo` CHAR(36),
   `idAlamat` CHAR(36) NOT NULL,
-  `idDompet` CHAR(36) NOT NULL,
+  `idMetodePembayaran` CHAR(36) NOT NULL,
   `tanggal` DATE NOT NULL,
-  `catatan` VARCHAR(255),
-  `status` VARCHAR(255) NOT NULL,
   `createdAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updatedAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -212,22 +232,60 @@ CREATE TABLE IF NOT EXISTS `shop`.`pesanan` (
     CONSTRAINT `fk_idAlamatPesanan`
     FOREIGN KEY (`idAlamat`)
     REFERENCES `shop`.`alamat` (`id`),
-  CONSTRAINT `fk_idDompetPesanan`
-    FOREIGN KEY (`idDompet`)
-    REFERENCES `shop`.`dompetDigital` (`id`)
+  CONSTRAINT `fk_idMetodePembayaranPesanan`
+    FOREIGN KEY (`idMetodePembayaran`)
+    REFERENCES `shop`.`metodePembayaran` (`id`)
+)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+CREATE TABLE IF NOT EXISTS `shop`.`kurir` (
+  `id` CHAR(36) NOT NULL,
+  `nama` CHAR(36) NOT NULL,
+  `ongkir` DECIMAL(10,2) NOT NULL,
+  `createdAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updatedAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8;
+
+CREATE TABLE IF NOT EXISTS `shop`.`pesananPelapak` (
+  `id` CHAR(36) NOT NULL,
+  `idPesanan` CHAR(36) NOT NULL,
+  `idPelapak` CHAR(36) NOT NULL,
+  `idKurir` CHAR(36) NOT NULL,
+  `idPromoPelapak` CHAR(36),
+  `status` VARCHAR(255) NOT NULL,
+  `catatan` VARCHAR(255),
+  `createdAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updatedAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `fk_idPesananPesananPelapak`
+    FOREIGN KEY (`idPesanan`)
+    REFERENCES `shop`.`pesanan` (`id`),
+  CONSTRAINT `fk_idPelapakPesananPelapak`
+    FOREIGN KEY (`idPelapak`)
+    REFERENCES `shop`.`pelapak` (`id`),
+  CONSTRAINT `fk_idKurirPesananPelapak`
+    FOREIGN KEY (`idKurir`)
+    REFERENCES `shop`.`kurir` (`id`),
+  CONSTRAINT `fk_idPromoPelapakPesananPelapak`
+    FOREIGN KEY (`idPromoPelapak`)
+    REFERENCES `shop`.`promoPelapak` (`id`)
 )
 ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
 
 CREATE TABLE IF NOT EXISTS `shop`.`detailPesanan` (
-  `idPesanan` CHAR(36) NOT NULL,
+  `idPesananPelapak` CHAR(36) NOT NULL,
   `idProduk` CHAR(36) NOT NULL,
   `jumlah` INT NOT NULL,
   `createdAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updatedAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  CONSTRAINT `fk_idPesananDetailPesanan`
-    FOREIGN KEY (`idPesanan`)
-    REFERENCES `shop`.`pesanan` (`id`),
+  CONSTRAINT `fk_idPesananPelapakDetailPesanan`
+    FOREIGN KEY (`idPesananPelapak`)
+    REFERENCES `shop`.`pesananPelapak` (`id`),
   CONSTRAINT `fk_idProdukPesanan`
     FOREIGN KEY (`idProduk`)
     REFERENCES `shop`.`produk` (`id`)

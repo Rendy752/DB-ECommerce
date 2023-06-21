@@ -40,29 +40,21 @@ delimiter ;
 
 INSERT INTO `shop`.`pengguna` (`namaLengkap`, `username`, `noTelp`, `email`, `password`, `pin`) VALUES 
 ('Ilham', 'ilhamz','08129022310', 'ilham@gmail.com', 'ilham7580', '7580');
-
 INSERT INTO `shop`.`pengguna` (`namaLengkap`, `username`, `email`, `password`) VALUES 
 ('Ilham', 'gogo', 'ilham@gmail.com', 'ilham7580');-- email sama
-
 INSERT INTO `shop`.`pengguna` (`namaLengkap`, `username`, `noTelp`, `password`) VALUES 
 ('Ilham', 'alhim','08129022310', 'ilham7580');-- no telepon sama
-
 INSERT INTO `shop`.`pengguna` (`namaLengkap`, `noTelp`, `password`) VALUES 
 ('Laura', '085367818912', 'laura12');-- password <8 digit
-
 INSERT INTO `shop`.`pengguna` (`namaLengkap`, `username`, `noTelp`,`email`, `password`) VALUES 
 ('Laura', 'ilhamz','085367818912', 'Laura22@gmail.com','laura123'); -- email, no telp baru tpi username sama
-
 INSERT INTO `shop`.`pengguna` (`namaLengkap`, `username`, `noTelp`,`email`, `password`) VALUES 
 ('Laura', 'lauraz','085367818912', 'Laura22@gmail.com','laura123'); 
-
 INSERT INTO `shop`.`pengguna` (`namaLengkap`, `username`, `noTelp`,`email`, `password`, `pin`) VALUES 
 ('Budi', 'budiz','0846635353553', 'budi343@gmail.com','budi6565','6565');
-
 INSERT INTO `shop`.`pengguna` (`namaLengkap`, `username`, `noTelp`,`email`, `password`, `pin`) VALUES 
 ('Lilia', 'liliaz','084873847384', 'lilia444@gmail.com','lilia6565','4444');
 select*from pengguna;
-
 
 delimiter <>
 create trigger addKategori
@@ -82,7 +74,7 @@ INSERT INTO `shop`.`kategori` (`nama`) VALUES ('Fashion');
 INSERT INTO `shop`.`kategori` (`nama`) VALUES ('Elektronik');
 INSERT INTO `shop`.`kategori` (`nama`) VALUES ('Perfume');
 INSERT INTO `shop`.`kategori` (`nama`) VALUES ('Accesories');
-INSERT INTO `shop`.`kategori` (`nama`) VALUES ('fashion');
+INSERT INTO `shop`.`kategori` (`nama`) VALUES ('Fashion'); -- kategori sudah ada
 INSERT INTO `shop`.`kategori` (`nama`) VALUES ('Alat Dapur');
 select*from kategori;
 
@@ -105,7 +97,7 @@ INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES
 INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES 
 ('Zara', 'Bandung');
 INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES 
-('Asus Official', 'Jakarta');
+('Asus Official', 'Jakarta'); -- pelapak dengan lokasi sama
 INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES 
 ('Indonesia Merk', 'Jakarta');
 INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES 
@@ -119,31 +111,29 @@ INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES
 INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES 
 ('Samsung Official', 'Jakarta');
 INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES 
-('Samsung Official', 'Jakarta');
-INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES 
 ('Nike', 'Bogor');
 select*from pelapak;
 
 delimiter <>
-create or replace trigger addDompetDigital
-before insert on dompetdigital for each row
+create or replace trigger addMetodePembayaran
+before insert on metodePembayaran for each row
 begin
-declare cekDompetDigital int;
-set cekDompetDigital=(select nama from dompetdigital where nama=new.nama);
-if(cekDompetDigital is not null) then
-	signal sqlstate '44444' set message_text = 'Dompet digital sudah ada, tidak dapat menambah data';
+declare cekMetodePembayaran int;
+set cekMetodePembayaran=(select nama from MetodePembayaran where nama=new.nama);
+if(cekMetodePembayaran is not null) then
+	signal sqlstate '44444' set message_text = 'Metode pembayaran sudah ada, tidak dapat menambah data';
 end if;
 set new.id = uuid();
 end <>
 delimiter ;
 
-INSERT INTO `shop`.`dompetDigital` (`nama`) VALUES ('OVO');
-INSERT INTO `shop`.`dompetDigital` (`nama`) VALUES ('BCA');
-INSERT INTO `shop`.`dompetDigital` (`nama`) VALUES ('OVO');
-INSERT INTO `shop`.`dompetDigital` (`nama`) VALUES ('GoPay');
-INSERT INTO `shop`.`dompetDigital` (`nama`) VALUES ('ShopeePay');
-INSERT INTO `shop`.`dompetDigital` (`nama`) VALUES ('DANA');
-select*from dompetdigital;
+INSERT INTO `shop`.`metodePembayaran` (`nama`) VALUES ('OVO');
+INSERT INTO `shop`.`metodePembayaran` (`nama`) VALUES ('BCA');
+INSERT INTO `shop`.`metodePembayaran` (`nama`) VALUES ('OVO'); -- metode pembayaran sudah ada
+INSERT INTO `shop`.`metodePembayaran` (`nama`) VALUES ('GoPay');
+INSERT INTO `shop`.`metodePembayaran` (`nama`) VALUES ('ShopeePay');
+INSERT INTO `shop`.`metodePembayaran` (`nama`) VALUES ('DANA');
+select*from metodePembayaran;
 
 delimiter <>
 create or replace trigger addPromo
@@ -151,28 +141,67 @@ before insert on promo for each row
 begin
 declare cekPromo int;
 set cekPromo=(select nama from promo where nama=new.nama);
-if(cekPromo is not null) then
+if(new.berlakuHingga<date(now())) then
+	signal sqlstate '44444' set message_text = 'Tanggal berlaku sudah lewat, tidak dapat menambah data';
+elseif(cekPromo is not null) then
 	signal sqlstate '44444' set message_text = 'Promo sudah ada, tidak dapat menambah data';
 end if;
 set new.id = uuid();
 end <>
 delimiter ;
 
-INSERT INTO `shop`.`promo` (`nama`, `deskripsi`, `minTransaksi`, `diskon`,`levelPengguna`) VALUES 
-('Promo Lebaran', 'Diskon 20% untuk semua produk', 100000, 20, 1);
-INSERT INTO `shop`.`promo` (`nama`, `deskripsi`, `minTransaksi`, `diskon`, `levelPengguna`) VALUES 
-('Promo Natal', 'Diskon 10% untuk semua produk', 200000, 10, 2);
-INSERT INTO `shop`.`promo` (`nama`, `deskripsi`, `minTransaksi`, `diskon`, `levelPengguna`) VALUES 
-('Promo Lebaran', 'Diskon 30% untuk semua produk', 100000, 30, 1);
-INSERT INTO `shop`.`promo` (`nama`, `deskripsi`, `minTransaksi`, `diskon`, `levelPengguna`) VALUES 
-('Promo Lebaran 2', 'Diskon 30% untuk semua produk', 150000, 30, 1);
-INSERT INTO `shop`.`promo` (`nama`, `deskripsi`, `minTransaksi`, `diskon`, `levelPengguna`) VALUES 
-('Promo 6.6', 'Diskon 20% untuk semua produk', 400000, 20, 3);
-INSERT INTO `shop`.`promo` (`nama`, `deskripsi`, `minTransaksi`, `diskon`, `levelPengguna`) VALUES 
-('Promo Potongan', 'Diskon 10% Potongan Untuk Produk Yang Dpilih', 0, 10, 1);
-INSERT INTO `shop`.`promo` (`nama`, `deskripsi`, `minTransaksi`, `diskon`, `levelPengguna`) VALUES 
-('Promo Tahun Baru', 'Diskon 40% untuk semua produk', 200000, 40, 3);
+INSERT INTO `shop`.`promo` (`nama`, `deskripsi`, `minTransaksi`, `diskon`,`levelPengguna`,`berlakuHingga`) VALUES 
+('Promo Lebaran', 'Diskon 20% untuk semua produk', 100000, 20, 1,'2023-06-19'); -- tanggal berlaku lewat
+INSERT INTO `shop`.`promo` (`nama`, `deskripsi`, `minTransaksi`, `diskon`,`levelPengguna`,`berlakuHingga`) VALUES 
+('Promo Lebaran', 'Diskon 20% untuk semua produk', 100000, 20, 1,'2023-07-19');
+INSERT INTO `shop`.`promo` (`nama`, `deskripsi`, `minTransaksi`, `diskon`, `levelPengguna`,`berlakuHingga`) VALUES 
+('Promo Natal', 'Diskon 10% untuk semua produk', 200000, 10, 2,'2023-08-30');
+INSERT INTO `shop`.`promo` (`nama`, `deskripsi`, `minTransaksi`, `diskon`, `levelPengguna`,`berlakuHingga`) VALUES 
+('Promo Lebaran', 'Diskon 30% untuk semua produk', 100000, 30, 1,'2023-08-30'); -- nama promo sama
+INSERT INTO `shop`.`promo` (`nama`, `deskripsi`, `minTransaksi`, `diskon`, `levelPengguna`,`berlakuHingga`) VALUES 
+('Promo Lebaran 2', 'Diskon 30% untuk semua produk', 150000, 30, 1,'2023-08-30');
+INSERT INTO `shop`.`promo` (`nama`, `deskripsi`, `minTransaksi`, `diskon`, `levelPengguna`,`berlakuHingga`) VALUES 
+('Promo 6.6', 'Diskon 20% untuk semua produk', 400000, 20, 3,'2023-10-30');
+INSERT INTO `shop`.`promo` (`nama`, `deskripsi`, `minTransaksi`, `diskon`, `levelPengguna`,`berlakuHingga`) VALUES 
+('Promo Potongan', 'Diskon 10% Potongan Untuk Produk Yang Dpilih', 0, 10, 1,'2023-08-15');
+INSERT INTO `shop`.`promo` (`nama`, `deskripsi`, `minTransaksi`, `diskon`, `levelPengguna`,`berlakuHingga`) VALUES 
+('Promo Tahun Baru', 'Diskon 40% untuk semua produk', 200000, 40, 3,'2023-11-30');
 select*from promo;
+
+delimiter <>
+create or replace trigger addPromoPelapak
+before insert on promoPelapak for each row
+begin
+declare cekPromo char(36);
+declare varIdPelapak char(36);
+set varIdPelapak=(select id from pelapak where nama=new.idPelapak);
+set cekPromo=(select count(*) from promoPelapak where idPelapak=varIdPelapak and nama=new.nama);
+if(varIdPelapak is null) then
+	signal sqlstate '44444' set message_text = 'Pelapak tidak diketahui, tidak dapat menambah data';
+elseif(new.berlakuHingga<date(now())) then
+	signal sqlstate '44444' set message_text = 'Tanggal berlaku sudah lewat, tidak dapat menambah data';
+elseif(cekPromo!=0) then
+	signal sqlstate '44444' set message_text = 'Promo sudah ada, tidak dapat menambah data';
+end if;
+set new.id = uuid();
+set new.idPelapak=varIdPelapak;
+end <>
+delimiter ;
+
+INSERT INTO `shop`.`promoPelapak` (`idPelapak`,`nama`, `deskripsi`, `minTransaksi`, `diskon`,`berlakuHingga`) VALUES 
+('Zoro','Potongan harga', 'Diskon 10% untuk semua produk', 100000, 10,'2023-08-15'); -- pelapak tidak diketahui
+INSERT INTO `shop`.`promoPelapak` (`idPelapak`,`nama`, `deskripsi`, `minTransaksi`, `diskon`,`berlakuHingga`) VALUES 
+('Zara','Potongan harga', 'Diskon 10% untuk semua produk', 100000, 10,'2022-12-30');
+INSERT INTO `shop`.`promoPelapak` (`idPelapak`,`nama`, `deskripsi`, `minTransaksi`, `diskon`,`berlakuHingga`) VALUES 
+('Zara','Potongan harga', 'Diskon 10% untuk semua produk', 100000, 10,'2023-12-30');
+INSERT INTO `shop`.`promoPelapak` (`idPelapak`,`nama`, `deskripsi`, `minTransaksi`, `diskon`,`berlakuHingga`) VALUES 
+('Zara','Potongan harga', 'Diskon 10% untuk semua produk', 100000, 10,'2023-08-30'); -- promo sudah ada di pelapak yang sama
+INSERT INTO `shop`.`promoPelapak` (`idPelapak`,`nama`, `deskripsi`, `minTransaksi`, `diskon`,`berlakuHingga`) VALUES 
+('Asus Official','Promo Lebaran', 'Diskon 20% untuk semua produk', 100000, 20,'2023-10-30');
+INSERT INTO `shop`.`promoPelapak` (`idPelapak`,`nama`, `deskripsi`, `minTransaksi`, `diskon`,`berlakuHingga`) VALUES 
+('Sonny Official','Potongan harga', 'Diskon 15% untuk semua produk', 120000, 15,'2023-09-30');
+select*from promoPelapak;
+
 
 delimiter <>
 create or replace trigger addAlamat
@@ -194,57 +223,52 @@ delimiter ;
 
 INSERT INTO `shop`.`alamat` (`idPengguna`, `alamat`, `alamatSebagai`, `namaPenerima`, `noTelp`, `kecamatan`, `kota`, `provinsi`, `kodePos`) values
 ('ilhamz','Jl. Rambutan No. 123', 'rumah', 'Ilham', '08129022310', 'Kec. Rambutan', 'Kota Palembang', 'Provinsi Sumatera Selatan', 32511);
-
 INSERT INTO `shop`.`alamat` (`idPengguna`, `alamat`, `alamatSebagai`, `namaPenerima`, `noTelp`, `kecamatan`, `kota`, `provinsi`, `kodePos`) values
 ('budiz','Jl. Mangga No. 456', 'kantor', 'Citra', '087638172311', 'Kec. Mangga', 'Kota Palembang', 'Provinsi Sumatera Selatan', 32512);
-
 INSERT INTO `shop`.`alamat` (`idPengguna`, `alamat`, `alamatSebagai`, `namaPenerima`, `noTelp`, `kecamatan`, `kota`, `provinsi`, `kodePos`) values
 ('lauraz','Jl. Rambutan No. 124', 'rumah', 'Santoso', '08878797979', 'Kec. Rambutan', 'Kota Palembang', 'Provinsi Sumatera Selatan', 32511);
-
 INSERT INTO `shop`.`alamat` (`idPengguna`, `alamat`, `alamatSebagai`, `namaPenerima`, `noTelp`, `kecamatan`, `kota`, `provinsi`, `kodePos`) values
 ('laurazz','Jl. Apel No. 789', 'rumah', 'Laura', '085367818912', 'Kec. Apel', 'Kota Palembang', 'Provinsi Sumatera Selatan', 32513); -- id pengguna tidak diketahui
-
 INSERT INTO `shop`.`alamat` (`idPengguna`, `alamat`, `alamatSebagai`, `namaPenerima`, `noTelp`, `kecamatan`, `kota`, `provinsi`, `kodePos`) values
 ('budiz','Jl. Mangga No. 456', 'rumah', 'Windah', '085378908716', 'Kec. Jeruk', 'Kota Palembang', 'Provinsi Sumatera Selatan', 32514); -- alamat sudah ada di pengguna yang sama
-
 INSERT INTO `shop`.`alamat` (`idPengguna`, `alamat`, `alamatSebagai`, `namaPenerima`, `noTelp`, `kecamatan`, `kota`, `provinsi`, `kodePos`) values
 ('lauraz','Jl. Manggis No. 202', 'rumah', 'Windah', '085379809112', 'Kec. Manggis', 'Kota Palembang', 'Provinsi Sumatera Selatan', 32515);
-
 INSERT INTO `shop`.`alamat` (`idPengguna`, `alamat`, `alamatSebagai`, `namaPenerima`, `noTelp`, `kecamatan`, `kota`, `provinsi`, `kodePos`) values
 ('ilhamz','Jl. Apel No. 789', 'rumah', 'Edi', '085367818912', 'Kec. Apel', 'Kota Palembang', 'Provinsi Sumatera Selatan', 32513);
 select*from alamat;
 
 delimiter <>
-create or replace trigger addDompetTerhubung
-before insert on dompetTerhubung for each row
+create or replace trigger addMetodePembayaranTerhubung
+before insert on metodePembayaranTerhubung for each row
 begin
 declare varIdPengguna char(36);
-declare varIdDompetDigital char(36);
-declare cekDompetPengguna int;
+declare varIdMetodePembayaran char(36);
+declare cekMetodePembayaranPengguna int;
 set varIdPengguna=(select id from pengguna where username=new.idPengguna);
-set varIdDompetDigital=(select id from dompetDigital where nama=new.idDompet);
-set cekDompetPengguna=(select count(*) from dompetTerhubung where idPengguna=varIdPengguna and idDompet=varIdDompetDigital);
+set varIdMetodePembayaran=(select id from MetodePembayaran where nama=new.idMetodePembayaran);
+set cekMetodePembayaranPengguna=(select count(*) from metodePembayaranTerhubung where idPengguna=varIdPengguna and idMetodePembayaran=varIdMetodePembayaran);
 if(varIdPengguna is null) then
 	signal sqlstate '44444' set message_text = 'Pengguna tidak diketahui, tidak dapat menambah data';
-elseif(varIdDompetDigital is null) then
-	signal sqlstate '44444' set message_text = 'Dompet digital tidak diketahui, tidak dapat menambah data';
-elseif(cekDompetPengguna!=0) then
-	signal sqlstate '44444' set message_text = 'Pengguna sudah memiliki dompet terkait';
+elseif(varIdMetodePembayaran is null) then
+	signal sqlstate '44444' set message_text = 'Metode pembayaran tidak diketahui, tidak dapat menambah data';
+elseif(cekMetodePembayaranPengguna!=0) then
+	signal sqlstate '44444' set message_text = 'Pengguna sudah memiliki metode pembayaran terkait';
 end if;
 set new.idPengguna=varIdPengguna;
-set new.idDompet=varIdDompetDigital;
+set new.idMetodePembayaran=varIdMetodePembayaran;
 end <>
 delimiter ;
 
-INSERT INTO `shop`.`dompetTerhubung` (`idPengguna`, `idDompet`) values ('susanto','ovo');
-INSERT INTO `shop`.`dompetTerhubung` (`idPengguna`, `idDompet`) values ('ilhamz','bri');
-INSERT INTO `shop`.`dompetTerhubung` (`idPengguna`, `idDompet`) values ('ilhamz','ovo');
-INSERT INTO `shop`.`dompetTerhubung` (`idPengguna`, `idDompet`) values ('ilhamz','dana');
-INSERT INTO `shop`.`dompetTerhubung` (`idPengguna`, `idDompet`) values ('lauraz','dana');
-INSERT INTO `shop`.`dompetTerhubung` (`idPengguna`, `idDompet`) values ('budiz','bca');
-INSERT INTO `shop`.`dompetTerhubung` (`idPengguna`, `idDompet`) values ('budiz','gopay');
-INSERT INTO `shop`.`dompetTerhubung` (`idPengguna`, `idDompet`) values ('budiz','shopeepay');
-select*from dompetTerhubung;
+INSERT INTO `shop`.`metodePembayaranTerhubung` (`idPengguna`, `idMetodePembayaran`) values ('susanto','ovo'); -- pengguna tidak diketahui
+INSERT INTO `shop`.`metodePembayaranTerhubung` (`idPengguna`, `idMetodePembayaran`) values ('ilhamz','ShopeePay'); -- metode pembayaran tidak diketahui
+INSERT INTO `shop`.`metodePembayaranTerhubung` (`idPengguna`, `idMetodePembayaran`) values ('ilhamz','ovo');
+INSERT INTO `shop`.`metodePembayaranTerhubung` (`idPengguna`, `idMetodePembayaran`) values ('ilhamz','ovo'); -- metode pembayaran sudah ada di pengguna yang sama
+INSERT INTO `shop`.`metodePembayaranTerhubung` (`idPengguna`, `idMetodePembayaran`) values ('ilhamz','dana');
+INSERT INTO `shop`.`metodePembayaranTerhubung` (`idPengguna`, `idMetodePembayaran`) values ('lauraz','dana');
+INSERT INTO `shop`.`metodePembayaranTerhubung` (`idPengguna`, `idMetodePembayaran`) values ('budiz','bca');
+INSERT INTO `shop`.`metodePembayaranTerhubung` (`idPengguna`, `idMetodePembayaran`) values ('budiz','gopay');
+INSERT INTO `shop`.`metodePembayaranTerhubung` (`idPengguna`, `idMetodePembayaran`) values ('budiz','shopeepay');
+select*from metodePembayaranTerhubung;
 
 delimiter <>
 create or replace trigger addProduk
@@ -286,7 +310,7 @@ INSERT INTO `shop`.`produk` (`idKategori`, `idPelapak`, `nama`, `stok`, `kondisi
 INSERT INTO `shop`.`produk` (`idKategori`, `idPelapak`, `nama`, `stok`, `kondisi`, `berat`, `asal`, `deskripsi`, `harga`) VALUES 
 ('elektronik','asus official','Laptop Asus ZenForce', 20,'Baru', 2000, 'Lokal', 'Laptop Asus Zenforce Ram 12GB', 7000000);
 INSERT INTO `shop`.`produk` (`idKategori`, `idPelapak`, `nama`, `stok`, `kondisi`, `berat`, `asal`, `deskripsi`, `harga`) VALUES 
-('fashion', 'zara', 'Kemeja Denim, ukuran M', 50, 'sangat baru', 100, 'lokal', 'Kemeja Denim Pria Ukuran M', 350000); -- tidak boleh koma
+('fashion', 'zara', 'Kemeja Denim, ukuran M', 50, 'sangat baru', 100, 'lokal', 'Kemeja Denim Pria Ukuran M', 350000); -- nama tidak boleh koma
 INSERT INTO `shop`.`produk` (`idKategori`, `idPelapak`, `nama`, `stok`, `kondisi`, `berat`, `asal`, `deskripsi`, `harga`) VALUES 
 ('fashion', 'zara', 'Kemeja Denim', 50, 'sangat baru', 100, 'lokal', 'Kemeja Denim Pria Ukuran M', 350000); -- kondisi tidak diketahui
 INSERT INTO `shop`.`produk` (`idKategori`, `idPelapak`, `nama`, `stok`, `kondisi`, `berat`, `asal`, `deskripsi`, `harga`) VALUES 
@@ -326,11 +350,11 @@ end if;
 end <>
 delimiter ;
 
-INSERT INTO `shop`.`produkFavorit` (`idPengguna`, `idProduk`) VALUES ('tono','Headphone Sony');
-INSERT INTO `shop`.`produkFavorit` (`idPengguna`, `idProduk`) VALUES ('ilhamz','Headphone Asus');
+INSERT INTO `shop`.`produkFavorit` (`idPengguna`, `idProduk`) VALUES ('tono','Headphone Sony'); -- pengguna tidak diketahuu
+INSERT INTO `shop`.`produkFavorit` (`idPengguna`, `idProduk`) VALUES ('ilhamz','Headphone Asus'); -- produk tidak diketahui
 INSERT INTO `shop`.`produkFavorit` (`idPengguna`, `idProduk`) VALUES ('ilhamz','Headphone Sony');
 INSERT INTO `shop`.`produkFavorit` (`idPengguna`, `idProduk`) VALUES ('ilhamz','Kemeja Denim');
-INSERT INTO `shop`.`produkFavorit` (`idPengguna`, `idProduk`) VALUES ('ilhamz','Kemeja Denim');
+INSERT INTO `shop`.`produkFavorit` (`idPengguna`, `idProduk`) VALUES ('ilhamz','Kemeja Denim'); -- produk sudah ada di list pengguna yang sama
 INSERT INTO `shop`.`produkFavorit` (`idPengguna`, `idProduk`) VALUES ('ilhamz','Sepatu Nike Running');
 INSERT INTO `shop`.`produkFavorit` (`idPengguna`, `idProduk`) VALUES ('lauraz','Kemeja Denim');
 INSERT INTO `shop`.`produkFavorit` (`idPengguna`, `idProduk`) VALUES ('budiz','Kemeja Denim');
@@ -371,12 +395,12 @@ end if;
 end <>
 delimiter ;
 
-INSERT INTO `shop`.`keranjang` (`idPengguna`, `idProduk`,`jumlah`) VALUES ('tono','Headphone Sony',20);
-INSERT INTO `shop`.`keranjang` (`idPengguna`, `idProduk`,`jumlah`) VALUES ('ilhamz','Headphone Asus',30);
-INSERT INTO `shop`.`keranjang` (`idPengguna`, `idProduk`,`jumlah`) VALUES ('ilhamz','Carolina Herera',40);
-INSERT INTO `shop`.`keranjang` (`idPengguna`, `idProduk`,`jumlah`) VALUES ('ilhamz','Kemeja Denim',51);
+INSERT INTO `shop`.`keranjang` (`idPengguna`, `idProduk`,`jumlah`) VALUES ('tono','Headphone Sony',20); -- pengguna tidak diketahui
+INSERT INTO `shop`.`keranjang` (`idPengguna`, `idProduk`,`jumlah`) VALUES ('ilhamz','Headphone Asus',30); -- produk tidak diketahui
+INSERT INTO `shop`.`keranjang` (`idPengguna`, `idProduk`,`jumlah`) VALUES ('ilhamz','Carolina Herera',40); -- stok barang kosong
+INSERT INTO `shop`.`keranjang` (`idPengguna`, `idProduk`,`jumlah`) VALUES ('ilhamz','Kemeja Denim',51); -- stok tidak tersedia
 INSERT INTO `shop`.`keranjang` (`idPengguna`, `idProduk`,`jumlah`) VALUES ('ilhamz','Kemeja Denim',30);
-INSERT INTO `shop`.`keranjang` (`idPengguna`, `idProduk`,`jumlah`) VALUES ('ilhamz','Kemeja Denim',1);
+INSERT INTO `shop`.`keranjang` (`idPengguna`, `idProduk`,`jumlah`) VALUES ('ilhamz','Kemeja Denim',1); -- produk sudah ada di keranjang pengguna yang sama
 INSERT INTO `shop`.`keranjang` (`idPengguna`, `idProduk`,`jumlah`) VALUES ('ilhamz','Sepatu Nike Running',20);
 INSERT INTO `shop`.`keranjang` (`idPengguna`, `idProduk`,`jumlah`) VALUES ('lauraz','Kemeja Denim',2);
 INSERT INTO `shop`.`keranjang` (`idPengguna`, `idProduk`,`jumlah`) VALUES ('budiz','Headphone Sony',5);
@@ -386,3 +410,22 @@ INSERT INTO `shop`.`keranjang` (`idPengguna`, `idProduk`,`jumlah`) VALUES ('lili
 INSERT INTO `shop`.`keranjang` (`idPengguna`, `idProduk`,`jumlah`) VALUES ('ilhamz','Laptop Asus ZenForce',2);
 INSERT INTO `shop`.`keranjang` (`idPengguna`, `idProduk`,`jumlah`) VALUES ('lauraz','Headphone Sony',3);
 select*from keranjang;
+
+delimiter <>
+create or replace trigger addKurir
+before insert on kurir for each row
+begin
+declare cekKurir int;
+set cekKurir=(select nama from kurir where nama=new.nama);
+if(cekKurir is not null) then
+	signal sqlstate '44444' set message_text = 'Kurir sudah ada, tidak dapat menambah data';
+end if;
+set new.id = uuid();
+end <>
+delimiter ;
+
+INSERT INTO `shop`.`kurir` (`nama`,`ongKir`) VALUES ('BukaExpress REG',27500);
+INSERT INTO `shop`.`kurir` (`nama`,`ongKir`) VALUES ('BukaExpress REG',27500); -- kurir sudah ada
+INSERT INTO `shop`.`kurir` (`nama`,`ongKir`) VALUES ('J&T REG',22500);
+INSERT INTO `shop`.`kurir` (`nama`,`ongKir`) VALUES ('SiCepat REG',27500);
+INSERT INTO `shop`.`kurir` (`nama`,`ongKir`) VALUES ('SiCepat HALU',19000);
