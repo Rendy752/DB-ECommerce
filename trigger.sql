@@ -92,26 +92,26 @@ set new.rating=0;
 end <>
 delimiter ;
 
-INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES 
-('Asus Official', 'Jakarta');
-INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES 
-('Zara', 'Bandung');
-INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES 
-('Asus Official', 'Jakarta'); -- pelapak dengan lokasi sama
-INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES 
-('Indonesia Merk', 'Jakarta');
-INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES 
-('Xyz Shop', 'Bandung');
-INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES 
-('H&M', 'Jakarta');
-INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES 
-('Gucci', 'Kalimantan');
-INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES 
-('Sonny Official','Semarang');
-INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES 
-('Samsung Official', 'Jakarta');
-INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES 
-('Nike', 'Bogor');
+INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES ('Asus Official', 'Jakarta');
+INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES ('Zara', 'Bandung');
+INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES ('Asus Official', 'Jakarta'); -- pelapak dengan lokasi sama
+INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES ('Indonesia Merk', 'Jakarta');
+INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES ('Xyz Shop', 'Bandung');
+INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES ('H&M', 'Jakarta');
+INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES ('Gucci', 'Kalimantan');
+INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES ('Sonny Official','Semarang');
+INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES ('Samsung Official', 'Jakarta');
+INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES ('Nike', 'Bogor');
+INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES ('Origin Aksesoris Hp', 'Jakarta Pusat');
+INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES ('Grotic', 'Tangerang');
+INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES ('Caselova Store', 'Bekasi');
+INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES ('Batik Shop', 'Surabaya');
+INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES ('Atmosphere Collection', 'Depok');
+INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES ('Figi Retail Grosir', 'Jakarta Pusat');
+INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES ('Pusat Photography', 'Bekasi');
+INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES ('Vivan Cell', 'Jakarta Timur');
+INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES ('CamLab', 'Jakarta Utara');
+INSERT INTO `shop`.`pelapak` (`nama`, `lokasi`) VALUES ('Januari', 'Jakarta Selatan');
 select*from pelapak;
 
 delimiter <>
@@ -325,6 +325,28 @@ INSERT INTO `shop`.`produk` (`idKategori`, `idPelapak`, `nama`, `stok`, `kondisi
 ('elektronik', 'sonny official', 'Headphone Sony', 25, 'baru', 300, 'impor', 'Headphone Sony Noise-Canceling', 1200000);
 INSERT INTO `shop`.`produk` (`idKategori`, `idPelapak`, `nama`, `stok`, `kondisi`, `berat`, `asal`, `deskripsi`, `harga`) VALUES 
 ('perfume', 'zara', 'Carolina Herera', 0, 'bekas', 350, 'impor', 'Jasmine scent, long lasting perfume with an unexpected twist of sensuality and mystery', 900000);
+INSERT INTO `shop`.`produk` (`idKategori`, `idPelapak`, `nama`, `stok`, `kondisi`, `berat`, `asal`, `deskripsi`, `harga`) VALUES 
+('elektronik', 'Origin Aksesoris Hp', 'Headphone Bluetooth airpods', 40, 'baru', 150, 'lokal', 'Suara mantap, bisa wireless charging', 110000);
+INSERT INTO `shop`.`produk` (`idKategori`, `idPelapak`, `nama`, `stok`, `kondisi`, `berat`, `asal`, `deskripsi`, `harga`) VALUES 
+('elektronik', 'Grotic', 'Grotic TWS Headphone Gaming', 14, 'baru', 200, 'lokal', 'Gaming mode, low latency 40-60ms', 158000);
+INSERT INTO `shop`.`produk` (`idKategori`, `idPelapak`, `nama`, `stok`, `kondisi`, `berat`, `asal`, `deskripsi`, `harga`) VALUES 
+('elektronik', 'Caselova Store', 'Headphone Bluetooth S109 Earphone Wireless', 14, 'baru', 50, 'lokal', 'Desain ramping dan ringan', 17900);
+INSERT INTO `shop`.`produk` (`idKategori`, `idPelapak`, `nama`, `stok`, `kondisi`, `berat`, `asal`, `deskripsi`, `harga`) VALUES 
+('elektronik', 'Batik Shop', 'I7S TWS Headphone Airpods Bluetooth Wireless', 148, 'baru', 200, 'lokal', 'Bisa pakai wireless, untuk apa menggunakan kabel?', 30600);
+INSERT INTO `shop`.`produk` (`idKategori`, `idPelapak`, `nama`, `stok`, `kondisi`, `berat`, `asal`, `deskripsi`, `harga`) VALUES 
+('elektronik', 'Atmosphere Collection', 'Headphone pro 4 mini TWS Wireless Nirkabel Stereo Hifi Sport', 50, 'baru', 400, 'lokal', 'Kompatibel untuk android, iphone, ipad', 84270);
+INSERT INTO `shop`.`produk` (`idKategori`, `idPelapak`, `nama`, `stok`, `kondisi`, `berat`, `asal`, `deskripsi`, `harga`) VALUES 
+('elektronik', 'Figi Retail Grosir', 'Gaming Headphone Wireless Super Bass', 7, 'baru', 1200, 'lokal', 'Nikmati pengalaman bermain game yang seru dengan ini', 681000);
+INSERT INTO `shop`.`produk` (`idKategori`, `idPelapak`, `nama`, `stok`, `kondisi`, `berat`, `asal`, `deskripsi`, `harga`) VALUES 
+('elektronik', 'Figi Retail Grosir', 'Microphone Headphone Mini Portable Tour Guide UHF', 5, 'baru', 350, 'lokal', 'Mentransmit suara melalui sinyal UHF dari frekuensi 630-690 MHz', 274000);
+INSERT INTO `shop`.`produk` (`idKategori`, `idPelapak`, `nama`, `stok`, `kondisi`, `berat`, `asal`, `deskripsi`, `harga`) VALUES 
+('elektronik', 'Pusat Photography', 'Motivo W18 TWS Headphone Bluetooth 5.3 Wireless', 10, 'baru', 300, 'lokal', 'Buds telinga stereo', 449900);
+INSERT INTO `shop`.`produk` (`idKategori`, `idPelapak`, `nama`, `stok`, `kondisi`, `berat`, `asal`, `deskripsi`, `harga`) VALUES 
+('elektronik', 'Vivan Cell', 'Headphone XIAOMI Handsfree BT', 200, 'baru', 50, 'lokal', 'No komplain, no retur', 12500);
+INSERT INTO `shop`.`produk` (`idKategori`, `idPelapak`, `nama`, `stok`, `kondisi`, `berat`, `asal`, `deskripsi`, `harga`) VALUES 
+('elektronik', 'CamLab', 'Saramonic WiTalk WT5D Wireless Intercom Headphone', 3000, 'baru', 50, 'lokal', 'Two-way communication at a range of up to 400m', 29500000);
+INSERT INTO `shop`.`produk` (`idKategori`, `idPelapak`, `nama`, `stok`, `kondisi`, `berat`, `asal`, `deskripsi`, `harga`) VALUES 
+('elektronik', 'Januari', 'Steelseries Arctis Nova Pro Wireless GameDAC Gaming Headphone', 2000, 'baru', 50, 'lokal', 'Bonus merchandise exclusive(gantungan kunci/stiker)', 8624000);
 select*from produk;
 
 delimiter <>

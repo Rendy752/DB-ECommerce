@@ -250,13 +250,6 @@ select*from pesananPelapak;
 select*from detailpesanan;
 select*from kurir;
 
-select sum(produk.harga*detailPesanan.jumlah) from pesananPelapak left join pesanan on pesanan.id=pesananPelapak.idPesanan 
-                join detailPesanan on pesananPelapak.id=detailPesanan.idPesananPelapak join produk on detailPesanan.idProduk=produk.id 
-                where pesanan.id='631c2e6f-1034-11ee-b1a1-6802ce07b577' and pesananPelapak.idPelapak='5fe3f7bd-0f81-11ee-813d-4ceab0b3711e';
-select sum(produk.harga*detailPesanan.jumlah) from pesananPelapak left join pesanan on pesanan.id=pesananPelapak.idPesanan 
-                join detailPesanan on pesananPelapak.id=detailPesanan.idPesananPelapak join produk on detailPesanan.idProduk=produk.id 
-                where pesananPelapak.id='fefbea1f-1037-11ee-b1a1-6802ce07b577';
-
 select*from lihatSemuaPesanan;
 call pesan('hafiz','','Jl. Siput No. 123','OVO','2023-06-07','Headphone Sony',1,'SiCepat HALU','Promo',''); -- username tidak diketahui
 call pesan('ilhamz','','Jl. Siput No. 123','OVO','2023-06-07','Headphone Sony',1,'SiCepat REG','Promo',''); -- alamat tidak deketahui pada pengguna terkait
@@ -305,3 +298,42 @@ call lihatNotaPesanan('9ce65cd8-103a-11ee-b1a1-6802ce07b577');
 call lihatNotaPesanan('41ed9c7c-103b-11ee-b1a1-6802ce07b577');
 call lihatNotaPesanan('797eefa8-1042-11ee-b1a1-6802ce07b577');
 call lihatNotaPesanan('b9ee6e6e-103b-11ee-b1a1-6802ce07b577');
+
+delimiter <>
+create or replace procedure cariProduk(varNama varchar(255))
+begin
+drop table if exists CariProduk;
+-- Relevansi
+create table if not exists CariProduk (`No(Relevansi)` int auto_increment primary key,Nama varchar(255),Harga decimal(10,2),Rating double,Terjual int,Lokasi varchar(20));
+insert into CariProduk (Nama,Harga,Rating,Terjual,Lokasi) select 
+produk.nama,produk.harga,produk.rating,produk.terjual,pelapak.lokasi 
+from produk,pelapak where produk.idPelapak=pelapak.id and produk.nama like concat('%',varNama,'%');
+select*from CariProduk;
+-- Terbaru
+truncate CariProduk;alter table CariProduk change column `No(Relevansi)` `No(Terbaru)` int auto_increment;
+insert into CariProduk (Nama,Harga,Rating,Terjual,Lokasi) select 
+produk.nama,produk.harga,produk.rating,produk.terjual,pelapak.lokasi 
+from produk,pelapak where produk.idPelapak=pelapak.id and produk.nama like concat('%',varNama,'%') order by produk.createdAt desc;
+select*from CariProduk;
+-- Terlaris
+truncate CariProduk;alter table CariProduk change column `No(Terbaru)` `No(Terlaris)` int auto_increment;
+insert into CariProduk (Nama,Harga,Rating,Terjual,Lokasi) select 
+produk.nama,produk.harga,produk.rating,produk.terjual,pelapak.lokasi 
+from produk,pelapak where produk.idPelapak=pelapak.id and produk.nama like concat('%',varNama,'%') order by produk.terjual desc;
+select*from CariProduk;
+-- Harga (Termurah)
+truncate CariProduk;alter table CariProduk change column `No(Terlaris)` `No(Harga Termurah)` int auto_increment;
+insert into CariProduk (Nama,Harga,Rating,Terjual,Lokasi) select 
+produk.nama,produk.harga,produk.rating,produk.terjual,pelapak.lokasi 
+from produk,pelapak where produk.idPelapak=pelapak.id and produk.nama like concat('%',varNama,'%') order by produk.harga asc;
+select*from CariProduk;
+-- Harga (Termahal)
+truncate CariProduk;alter table CariProduk change column `No(Harga Termurah)` `No(Harga Termahal)` int auto_increment;
+insert into CariProduk (Nama,Harga,Rating,Terjual,Lokasi) select 
+produk.nama,produk.harga,produk.rating,produk.terjual,pelapak.lokasi 
+from produk,pelapak where produk.idPelapak=pelapak.id and produk.nama like concat('%',varNama,'%') order by produk.harga desc;
+select*from CariProduk;
+drop table if exists CariProduk;
+end <>
+delimiter ;
+call cariProduk("headphone");
