@@ -34,3 +34,18 @@ sum(detailPesanan.jumlah*produk.Harga) as `Penjualan`
 from detailPesanan left join produk on detailPesanan.idProduk=produk.id join pelapak on produk.idPelapak = pelapak.id
 group by produk.id order by sum(detailPesanan.jumlah*produk.Harga) desc limit 3;
 select*from top3ProdukTerlaris;
+
+create or replace view lihatNotaPesanan as select pesananPelapak.id as `No. Pesanan`,round(coalesce(detailPesanan.jumlah*produk.harga+
+kurir.ongkir-coalesce((detailPesanan.jumlah*produk.harga)*(promoPelapak.diskon/100),0),detailPesanan.jumlah*produk.harga+kurir.ongkir),2) 
+as `Total Pembayaran`, pesanan.tanggal as `Tanggal Pemesanan`,alamat.namaPenerima as `Nama Penerima`,pelapak.nama as `Pelapak`,
+detailPesanan.jumlah*produk.harga as `Subtotal Belanja`,kurir.ongkir as `Ongkir`,detailPesanan.jumlah*produk.harga+kurir.ongkir 
+as `Subtotal`,concat('Rp',round(coalesce((detailPesanan.jumlah*produk.harga)*(promoPelapak.diskon/100),0),2)) as `Potongan Harga Barang`,
+round(coalesce(detailPesanan.jumlah*produk.harga+kurir.ongkir-coalesce((detailPesanan.jumlah*produk.harga)*
+(promoPelapak.diskon/100),0),detailPesanan.jumlah*produk.harga+kurir.ongkir),2) as `Total Belanja`,
+concat(alamat,', ',kecamatan,', ',kota,'. ',provinsi,', ',kodePos,'.') as `Alamat`, metodePembayaran.nama as `Metode Pembayaran`
+from promoPelapak right join pesananPelapak on promoPelapak.id=pesananPelapak.idPromoPelapak 
+join pesanan on pesananPelapak.idPesanan=pesanan.id join detailPesanan on detailPesanan.idPesananPelapak=pesananPelapak.id 
+join pelapak on pesananPelapak.idPelapak=pelapak.id join produk on detailPesanan.idProduk=produk.id join pengguna 
+on pesanan.idPengguna=pengguna.id join kurir on kurir.id=pesananPelapak.idKurir join alamat on pesanan.idAlamat=alamat.id 
+join metodePembayaran on metodePembayaran.id=pesanan.idMetodePembayaran;
+select*from lihatNotaPesanan;
